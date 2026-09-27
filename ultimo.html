@@ -1,0 +1,4532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EcoQuest: Natural Resources & The Environment (5th Grade Science)</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts: Fredoka & Inter -->
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <!-- Three.js CDN for 3D Interactive Graphics -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+  <!-- Canvas Confetti CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <style>
+    body {
+      font-family: 'Nunito', sans-serif;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      overflow-x: hidden;
+    }
+    h1, h2, h3, h4, .brand-font {
+      font-family: 'Fredoka', cursive, sans-serif;
+    }
+    .bounce-subtle {
+      animation: bounceSubtle 2.2s infinite ease-in-out;
+    }
+    @keyframes bounceSubtle {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-7px); }
+    }
+    .pulse-glow {
+      animation: pulseGlow 1.8s infinite;
+    }
+    @keyframes pulseGlow {
+      0%, 100% { box-shadow: 0 0 15px rgba(52, 211, 153, 0.4); }
+      50% { box-shadow: 0 0 30px rgba(52, 211, 153, 0.85); }
+    }
+    .remedy-highlight {
+      border: 4px solid #F59E0B !important;
+      background-color: #FEF3C7 !important;
+      animation: alertPulse 1.4s infinite alternate;
+    }
+    @keyframes alertPulse {
+      0% { transform: scale(1); box-shadow: 0 0 10px rgba(245, 158, 11, 0.5); }
+      100% { transform: scale(1.02); box-shadow: 0 0 25px rgba(245, 158, 11, 0.9); }
+    }
+    .print-only {
+      display: none;
+    }
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      #printableDiploma, #printableDiploma * {
+        visibility: visible;
+      }
+      #printableDiploma {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        display: block !important;
+      }
+    }
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #e2e8f0;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #94a3b8;
+      border-radius: 9999px;
+    }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col justify-between antialiased selection:bg-emerald-300">
+
+  <!-- Top Global Header: Adaptive for all screen sizes -->
+  <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b-2 sm:border-b-4 border-slate-200 shadow-sm px-2 sm:px-4 py-2 sm:py-3">
+    <div class="max-w-6xl mx-auto flex items-center justify-between gap-1 sm:gap-3">
+      <!-- Brand & Map Return -->
+      <div class="flex items-center gap-1.5 sm:gap-3 flex-shrink-0">
+        <button id="navHomeBtn" onclick="app.showScreen('welcome')" class="group flex items-center gap-1 sm:gap-2 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold py-1.5 px-2.5 sm:py-2 sm:px-4 rounded-xl sm:rounded-2xl shadow-md transition-all active:scale-95">
+          <i class="fa-solid fa-earth-americas text-base sm:text-xl group-hover:rotate-12 transition-transform"></i>
+          <span class="brand-font tracking-wide hidden sm:inline text-sm sm:text-lg">EcoQuest 5th</span>
+        </button>
+        <span id="currentChapterBadge" class="hidden lg:inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
+          🌱 Ch. 1: Natural Resources
+        </span>
+      </div>
+
+      <!-- Player Stats & Audio Accessibility Bar -->
+      <div class="flex items-center gap-1 sm:gap-2.5 md:gap-4 flex-wrap justify-end">
+        <!-- Candies / Coins -->
+        <div class="flex items-center gap-1 bg-amber-50 border sm:border-2 border-amber-300 px-2 py-1 sm:px-3 sm:py-1.5 rounded-xl sm:rounded-2xl shadow-sm">
+          <span class="text-sm sm:text-xl">🍬</span>
+          <span id="candyCount" class="font-extrabold text-amber-900 text-xs sm:text-base md:text-lg">0</span>
+        </div>
+
+        <!-- Hearts / Lives -->
+        <div class="flex items-center gap-1 bg-rose-50 border sm:border-2 border-rose-300 px-2 py-1 sm:px-3 sm:py-1.5 rounded-xl sm:rounded-2xl shadow-sm">
+          <i class="fa-solid fa-heart text-rose-500 text-xs sm:text-base md:text-lg animate-pulse"></i>
+          <span id="heartCount" class="font-extrabold text-rose-700 text-xs sm:text-base md:text-lg">5</span>
+        </div>
+
+        <!-- Speech Speed Toggle (Hare 0.92 vs Turtle 0.80) -->
+        <button id="speechSpeedToggle" onclick="audioManager.toggleSpeed()" title="Voice Speed Toggle" class="flex items-center gap-1 bg-sky-100 border sm:border-2 border-sky-300 hover:bg-sky-200 text-sky-800 font-bold px-2 py-1 sm:px-3 sm:py-1.5 rounded-xl sm:rounded-2xl transition active:scale-95">
+          <span id="speedIcon" class="text-sm sm:text-lg">🐇</span>
+          <span id="speedLabel" class="text-[10px] sm:text-xs font-extrabold hidden md:inline">Normal</span>
+        </button>
+
+        <!-- Voice Mute Toggle -->
+        <button id="voiceMuteToggle" onclick="audioManager.toggleMute()" title="Mute/Unmute Speech" class="w-7 h-7 sm:w-9 sm:h-9 md:w-10 md:h-10 flex items-center justify-center bg-indigo-100 border sm:border-2 border-indigo-300 hover:bg-indigo-200 text-indigo-700 rounded-xl sm:rounded-2xl transition active:scale-95 text-xs sm:text-sm">
+          <i id="muteIcon" class="fa-solid fa-volume-high"></i>
+        </button>
+
+        <!-- Rewards Shop Trigger -->
+        <button onclick="shop.openModal()" title="Reward Shop" class="bg-gradient-to-br from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white font-bold p-1.5 sm:px-3 sm:py-1.5 rounded-xl sm:rounded-2xl shadow-md transition active:scale-95 flex items-center gap-1">
+          <i class="fa-solid fa-store text-yellow-300 text-xs sm:text-base"></i>
+          <span class="hidden md:inline font-bold text-xs uppercase tracking-wider">Shop</span>
+        </button>
+
+        <!-- Active Avatar Widget -->
+        <div onclick="shop.openModal()" class="cursor-pointer relative w-7 h-7 sm:w-9 sm:h-9 md:w-10 md:h-10 rounded-xl sm:rounded-2xl bg-gradient-to-tr from-amber-300 to-yellow-400 p-0.5 shadow-md hover:scale-105 transition" title="Equipped Avatar (Tap to customize)">
+          <div id="userAvatarContainer" class="w-full h-full bg-white rounded-[10px] sm:rounded-[14px] flex items-center justify-center text-sm sm:text-lg md:text-xl overflow-hidden">
+            🧑‍🔬
+          </div>
+        </div>
+
+        <!-- Replay Robot Welcome Button -->
+        <button onclick="robotIntroManager.showIntro()" title="Call B-01 Robot" class="bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-slate-900 font-extrabold px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl sm:rounded-2xl shadow-md transition active:scale-95 flex items-center gap-1.5 text-xs">
+          <span>🤖</span>
+          <span class="hidden md:inline">B-01 Fly-In</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="flex-grow max-w-6xl w-full mx-auto p-3 sm:p-5 md:p-6 relative">
+    
+    <!-- ============================================== -->
+    <!-- 1. SCREEN: WELCOME & CHAPTER MAP               -->
+    <!-- ============================================== -->
+    <section id="welcomeScreen" class="space-y-6 sm:space-y-8 animate-fadeIn">
+      <!-- Hero Banner -->
+      <div class="relative overflow-hidden bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-700 rounded-2xl sm:rounded-3xl p-5 sm:p-8 md:p-10 text-white shadow-xl">
+        <div class="relative z-10 max-w-2xl space-y-3 sm:space-y-4">
+          <div class="flex items-center gap-2 flex-wrap">
+            <span class="inline-block bg-yellow-400 text-yellow-950 font-black text-[10px] sm:text-xs px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full uppercase tracking-wider shadow">
+              5th Grade Science Adventure
+            </span>
+            <button onclick="robotIntroManager.showIntro()" class="inline-flex items-center gap-1 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-yellow-200 font-extrabold text-[10px] sm:text-xs px-2.5 py-0.5 rounded-full border border-white/30 transition active:scale-95 cursor-pointer">
+              <span>🤖</span> Meet Pilot B-01
+            </button>
+          </div>
+          
+          <h1 class="text-2xl sm:text-4xl md:text-5xl font-extrabold tracking-tight leading-tight">
+            Natural Resources & The Environment! 🌍
+          </h1>
+          <p class="text-emerald-100 text-xs sm:text-base md:text-lg font-medium leading-relaxed">
+            "The environment holds a treasure chest of materials useful to people!" Explore energy, defeat pollution, and become a certified Earth Guardian!
+          </p>
+          
+          <div class="flex flex-wrap items-center gap-2 sm:gap-3 pt-1 sm:pt-2">
+            <div class="bg-black/30 backdrop-blur-md px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl sm:rounded-2xl flex items-center gap-1.5 sm:gap-2 border border-white/20 w-full sm:w-auto">
+              <span class="text-xs sm:text-sm font-bold flex-shrink-0">Explorer:</span>
+              <input id="studentNameInput" type="text" value="Leo the Scientist" class="bg-white/90 text-slate-800 font-bold px-2 sm:px-3 py-1 rounded-lg sm:rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400 w-full" />
+            </div>
+            <button onclick="app.updateName()" class="bg-yellow-400 hover:bg-yellow-300 text-slate-900 font-extrabold px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-xs sm:text-sm shadow transition active:scale-95 w-full sm:w-auto text-center">
+              Save Name & Start ✨
+            </button>
+          </div>
+        </div>
+
+        <!-- Floating Graphic Illustration -->
+        <div class="hidden lg:block absolute -right-6 -bottom-8 opacity-90 transform -rotate-3 hover:scale-105 transition-transform duration-300 pointer-events-none">
+          <div class="w-80 h-80 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center p-8 border-4 border-white/20">
+            <div class="text-center">
+              <span class="text-7xl block mb-2">⚡🏞️🦅</span>
+              <span class="font-black text-xl text-yellow-300">Grade 5 Curriculum</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Duolingo-Style Lesson Road Map -->
+      <div class="space-y-4">
+        <div class="flex items-center justify-between">
+          <h2 class="text-2xl font-black text-slate-800 flex items-center gap-2">
+            <i class="fa-solid fa-map-location-dot text-emerald-500"></i> Learning Path (3 Units)
+          </h2>
+          <span class="text-sm font-bold text-slate-500">Pass with 80%+ for Official Diploma</span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <!-- Chapter 1 Card -->
+          <div class="bg-white rounded-3xl p-6 border-4 border-emerald-300 shadow-lg hover:shadow-2xl transition-all transform hover:-translate-y-1 relative flex flex-col justify-between">
+            <div class="absolute -top-4 right-4 bg-emerald-500 text-white text-xs font-black px-3 py-1 rounded-full uppercase tracking-wider shadow">
+              Unit 1
+            </div>
+            <div>
+              <div class="w-16 h-16 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center text-3xl mb-4 shadow-inner">
+                ⚡
+              </div>
+              <h3 class="text-xl font-black text-slate-800 mb-1">Natural Resources</h3>
+              <p class="text-xs font-bold text-emerald-600 mb-3">Pages 320 – 333</p>
+              <p class="text-slate-600 text-sm mb-4 leading-relaxed">
+                Energy resources (Fossil fuels, Solar, Hydro dams, Windmills, Geothermal, Nuclear) & Material resources (Soil, Water, Rocks & Minerals).
+              </p>
+            </div>
+            <div class="space-y-3 pt-3 border-t border-slate-100">
+              <div class="flex justify-between items-center text-xs font-extrabold text-slate-500">
+                <span>Quiz Best: <span id="ch1BestScore" class="text-emerald-600">0%</span></span>
+                <span id="ch1StatusBadge" class="text-amber-500">Not Started</span>
+              </div>
+              <button onclick="app.launchChapter(1)" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold py-3 px-4 rounded-2xl shadow-md hover:shadow-lg transition active:scale-95 flex items-center justify-center gap-2">
+                <span>Start Mission</span>
+                <i class="fa-solid fa-arrow-right"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Chapter 2 Card -->
+          <div class="bg-white rounded-3xl p-6 border-4 border-amber-300 shadow-lg hover:shadow-2xl transition-all transform hover:-translate-y-1 relative flex flex-col justify-between">
+            <div class="absolute -top-4 right-4 bg-amber-500 text-white text-xs font-black px-3 py-1 rounded-full uppercase tracking-wider shadow">
+              Unit 2
+            </div>
+            <div>
+              <div class="w-16 h-16 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center text-3xl mb-4 shadow-inner">
+                🏭
+              </div>
+              <h3 class="text-xl font-black text-slate-800 mb-1">Pollution & Wastes</h3>
+              <p class="text-xs font-bold text-amber-600 mb-3">Pages 334 – 343</p>
+              <p class="text-slate-600 text-sm mb-4 leading-relaxed">
+                Garbage dumps vs Sanitary Landfills, Incinerators with scrubbers, Air smog, Acid rain damaging stone monuments, and Water pollution!
+              </p>
+            </div>
+            <div class="space-y-3 pt-3 border-t border-slate-100">
+              <div class="flex justify-between items-center text-xs font-extrabold text-slate-500">
+                <span>Quiz Best: <span id="ch2BestScore" class="text-amber-600">0%</span></span>
+                <span id="ch2StatusBadge" class="text-slate-400">Locked</span>
+              </div>
+              <button onclick="app.launchChapter(2)" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-extrabold py-3 px-4 rounded-2xl shadow-md hover:shadow-lg transition active:scale-95 flex items-center justify-center gap-2">
+                <span>Start Mission</span>
+                <i class="fa-solid fa-arrow-right"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Chapter 3 Card -->
+          <div class="bg-white rounded-3xl p-6 border-4 border-cyan-300 shadow-lg hover:shadow-2xl transition-all transform hover:-translate-y-1 relative flex flex-col justify-between">
+            <div class="absolute -top-4 right-4 bg-cyan-500 text-white text-xs font-black px-3 py-1 rounded-full uppercase tracking-wider shadow">
+              Unit 3
+            </div>
+            <div>
+              <div class="w-16 h-16 rounded-2xl bg-cyan-100 text-cyan-600 flex items-center justify-center text-3xl mb-4 shadow-inner">
+                🦅
+              </div>
+              <h3 class="text-xl font-black text-slate-800 mb-1">Conserving Resources</h3>
+              <p class="text-xs font-bold text-cyan-600 mb-3">Pages 344 – 353</p>
+              <p class="text-slate-600 text-sm mb-4 leading-relaxed">
+                The 3 R's (Reduce, Reuse, Recycle), compost piles, protecting wildlife habitats, Endangered Species Act, and captive breeding of Condors!
+              </p>
+            </div>
+            <div class="space-y-3 pt-3 border-t border-slate-100">
+              <div class="flex justify-between items-center text-xs font-extrabold text-slate-500">
+                <span>Quiz Best: <span id="ch3BestScore" class="text-cyan-600">0%</span></span>
+                <span id="ch3StatusBadge" class="text-slate-400">Locked</span>
+              </div>
+              <button onclick="app.launchChapter(3)" class="w-full bg-cyan-500 hover:bg-cyan-600 text-white font-extrabold py-3 px-4 rounded-2xl shadow-md hover:shadow-lg transition active:scale-95 flex items-center justify-center gap-2">
+                <span>Start Mission</span>
+                <i class="fa-solid fa-arrow-right"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- 2. SCREEN: CHAPTER ACTIVE WORKSPACE             -->
+    <!-- ============================================== -->
+    <section id="chapterScreen" class="hidden space-y-8 animate-fadeIn">
+      <!-- Top Subheader: Breadcrumb & Jump Steps -->
+      <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white p-3 sm:p-4 rounded-2xl border-2 border-slate-200 shadow-sm">
+        <div class="flex items-center gap-2.5 sm:gap-3">
+          <button onclick="app.showScreen('welcome')" class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold flex items-center justify-center transition active:scale-95 flex-shrink-0" title="Back to Map">
+            <i class="fa-solid fa-chevron-left text-sm sm:text-base"></i>
+          </button>
+          <div class="min-w-0">
+            <h2 id="chapterTitle" class="text-base sm:text-xl font-black text-slate-800 truncate">Unit 1: Natural Resources</h2>
+            <p id="chapterSubtitle" class="text-[10px] sm:text-xs text-slate-500 font-bold truncate">Interactive Science Laboratory & Vocabulary</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-1.5 sm:gap-2 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
+          <!-- Step indicator pills -->
+          <button onclick="app.jumpToSection('lab')" class="px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-xl font-extrabold text-[11px] sm:text-xs bg-emerald-500 text-white shadow-sm flex items-center gap-1 sm:gap-1.5 flex-shrink-0">
+            <i class="fa-solid fa-flask"></i> <span>1. Lab</span>
+          </button>
+          <button onclick="app.jumpToSection('cards')" class="px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-xl font-extrabold text-[11px] sm:text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center gap-1 sm:gap-1.5 flex-shrink-0">
+            <i class="fa-solid fa-layer-group"></i> <span>2. Concepts</span>
+          </button>
+          <button onclick="app.jumpToSection('glossary')" class="px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-xl font-extrabold text-[11px] sm:text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center gap-1 sm:gap-1.5 flex-shrink-0">
+            <i class="fa-solid fa-book"></i> <span>3. Glossary</span>
+          </button>
+          <button onclick="app.startQuiz()" class="px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-xl font-extrabold text-[11px] sm:text-xs bg-amber-500 text-white shadow-sm flex items-center gap-1 sm:gap-1.5 flex-shrink-0">
+            <i class="fa-solid fa-bolt"></i> <span>4. Quiz</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 2.3 LAB INTERACTIVO (CANVAS 2D 60 FPS) -->
+      <div id="sectionLab" class="bg-white rounded-2xl sm:rounded-3xl p-3 sm:p-5 md:p-7 border-2 sm:border-4 border-slate-200 shadow-xl space-y-3 sm:space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-2 sm:gap-3">
+          <div>
+            <span class="inline-block px-2.5 py-0.5 sm:px-3 sm:py-1 bg-emerald-100 text-emerald-800 text-[10px] sm:text-xs font-black rounded-full uppercase tracking-wider mb-1">
+              Interactive 60 FPS Physics Lab
+            </span>
+            <h3 id="labHeaderTitle" class="text-base sm:text-xl md:text-2xl font-black text-slate-800">
+              Energy Transformation & Material Cycles
+            </h3>
+          </div>
+          <button onclick="audioManager.speakCurrentLabDescription()" class="bg-indigo-50 border-2 border-indigo-200 text-indigo-700 hover:bg-indigo-100 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl font-bold text-[11px] sm:text-xs flex items-center gap-1.5 sm:gap-2 transition active:scale-95">
+            <i class="fa-solid fa-volume-high"></i> <span class="hidden xs:inline">Explain</span> Simulation
+          </button>
+        </div>
+
+        <!-- Simulation Viewport Canvas: 100% Clean Visual Viewport (No Text or HUD Overlays) -->
+        <div class="relative w-full aspect-video max-h-[460px] bg-slate-900 rounded-xl sm:rounded-2xl overflow-hidden shadow-inner border sm:border-2 border-slate-700">
+          <video id="simVideoPlayer" class="hidden w-full h-full object-cover" playsinline></video>
+          <canvas id="simCanvas" class="w-full h-full block"></canvas>
+        </div>
+
+        <!-- Clean Status Bar Located Outside Canvas Viewport -->
+        <div class="flex flex-wrap items-center justify-between gap-2 bg-slate-50 p-2.5 sm:p-3 rounded-xl sm:rounded-2xl border sm:border-2 border-slate-200">
+          <div class="flex items-center gap-2 text-xs font-bold text-slate-700 min-w-0">
+            <span id="hudStateDot" class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-emerald-500 animate-ping flex-shrink-0"></span>
+            <span id="hudStateText" class="font-extrabold text-slate-800 text-[11px] sm:text-xs truncate">Simulation Active</span>
+          </div>
+          <button onclick="simManager.togglePause()" class="bg-slate-800 hover:bg-slate-700 text-white text-[11px] sm:text-xs font-extrabold px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-lg sm:rounded-xl transition active:scale-95 flex items-center gap-1 sm:gap-1.5 shadow-sm ml-auto">
+            <i id="pausePlayIcon" class="fa-solid fa-pause"></i> <span>Pause / Play</span>
+          </button>
+        </div>
+
+        <!-- Simulation Interactive Buttons Bar -->
+        <div class="space-y-2">
+          <label class="text-[10px] sm:text-xs font-extrabold text-slate-500 uppercase tracking-wider">
+            Select Simulation Engine Mode:
+          </label>
+          <div id="simControlButtonsContainer" class="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
+            <!-- Dynamically injected unique buttons with IDs for Ch1, Ch2, or Ch3 -->
+          </div>
+        </div>
+      </div>
+
+      <!-- 2.4 TARJETAS DE CONCEPTOS DIDÁCTICOS -->
+      <div id="sectionCards" class="space-y-4">
+        <div class="flex items-center justify-between">
+          <h3 class="text-xl sm:text-2xl font-black text-slate-800 flex items-center gap-2">
+            <i class="fa-solid fa-brain text-indigo-500"></i> Core Concepts & Insights
+          </h3>
+          <span class="text-xs text-slate-500 font-bold">Tap any card to open detailed mini-animation</span>
+        </div>
+
+        <div id="conceptCardsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          <!-- Dynamically populated concept cards -->
+        </div>
+      </div>
+
+      <!-- 2.5 GLOSARIO INTERACTIVO CON PRONUNCIACIÓN -->
+      <div id="sectionGlossary" class="bg-white rounded-3xl p-5 sm:p-7 border-4 border-indigo-200 shadow-xl space-y-5">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <span class="inline-block px-3 py-1 bg-indigo-100 text-indigo-800 text-xs font-black rounded-full uppercase tracking-wider mb-1">
+              Vocabulary Mastery
+            </span>
+            <h3 class="text-xl sm:text-2xl font-black text-slate-800">
+              Interactive Science Glossary 📖
+            </h3>
+            <p class="text-xs sm:text-sm text-slate-500 font-medium">
+              Click anywhere on a term card to hear standard English pronunciation and definition. Check them all to auto-launch the Chapter Quiz!
+            </p>
+          </div>
+
+          <div class="flex items-center gap-2 bg-indigo-50 border-2 border-indigo-200 px-4 py-2 rounded-2xl">
+            <i class="fa-solid fa-list-check text-indigo-600"></i>
+            <span class="text-xs font-extrabold text-indigo-900">
+              Terms Checked: <span id="glossaryCounter">0</span> / <span id="glossaryTotal">5</span>
+            </span>
+          </div>
+        </div>
+
+        <!-- Glossary Cards Grid -->
+        <div id="glossaryGrid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Dynamically populated glossary items -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- 3. SCREEN: CHAPTER REVIEW QUIZ                 -->
+    <!-- ============================================== -->
+    <section id="quizScreen" class="hidden max-w-2xl mx-auto space-y-4 sm:space-y-6 animate-fadeIn">
+      <!-- Quiz Header & Health System -->
+      <div class="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-5 border-2 sm:border-4 border-slate-200 shadow-lg space-y-3 sm:space-y-4">
+        <div class="flex items-center justify-between">
+          <button onclick="app.showScreen('chapter')" class="text-slate-500 hover:text-slate-800 font-extrabold text-xs sm:text-sm flex items-center gap-1 transition">
+            <i class="fa-solid fa-arrow-left"></i> Review Lesson
+          </button>
+          <div class="flex items-center gap-1.5 sm:gap-2">
+            <span class="text-[10px] sm:text-xs font-black text-slate-500 uppercase">Lives:</span>
+            <div id="quizHeartsContainer" class="flex gap-1 text-rose-500 text-base sm:text-lg">
+              <i class="fa-solid fa-heart"></i>
+              <i class="fa-solid fa-heart"></i>
+              <i class="fa-solid fa-heart"></i>
+              <i class="fa-solid fa-heart"></i>
+              <i class="fa-solid fa-heart"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="space-y-1">
+          <div class="flex justify-between text-[11px] sm:text-xs font-extrabold text-slate-500">
+            <span id="quizQuestionNumber">Question 1 of 5</span>
+            <span id="quizProgressPercent">20%</span>
+          </div>
+          <div class="w-full h-2.5 sm:h-3 bg-slate-100 rounded-full overflow-hidden border border-slate-200">
+            <div id="quizProgressBar" class="h-full bg-gradient-to-r from-emerald-400 to-teal-500 transition-all duration-300 w-1/5"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Question Box -->
+      <div class="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 border-2 sm:border-4 border-slate-200 shadow-xl space-y-4 sm:space-y-6">
+        <div class="flex items-start gap-2.5 sm:gap-3">
+          <span class="w-7 h-7 sm:w-9 sm:h-9 rounded-xl sm:rounded-2xl bg-amber-100 text-amber-700 font-black flex items-center justify-center text-sm sm:text-lg flex-shrink-0">
+            ?
+          </span>
+          <h3 id="quizQuestionText" class="text-base sm:text-lg md:text-xl font-black text-slate-800 leading-snug">
+            What is the term for energy resources that nature can replace again and again?
+          </h3>
+        </div>
+
+        <!-- Options Container -->
+        <div id="quizOptionsContainer" class="space-y-2.5 sm:space-y-3">
+          <!-- Dynamically populated option buttons -->
+        </div>
+
+        <!-- Instant Feedback Alert Box -->
+        <div id="quizFeedbackBox" class="hidden p-3 sm:p-4 rounded-xl sm:rounded-2xl border-2 font-bold text-xs sm:text-sm flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 animate-fadeIn">
+          <div class="flex items-center gap-2.5 sm:gap-3">
+            <span id="quizFeedbackIcon" class="text-xl sm:text-2xl flex-shrink-0">🎉</span>
+            <div>
+              <p id="quizFeedbackTitle" class="font-black text-sm sm:text-base">Awesome Job!</p>
+              <p id="quizFeedbackDesc" class="text-[11px] sm:text-xs font-semibold">Renewable resources can be replaced naturally.</p>
+            </div>
+          </div>
+          <button id="quizNextBtn" onclick="quizManager.nextQuestion()" class="bg-slate-900 hover:bg-slate-800 text-white font-extrabold px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl shadow-md transition active:scale-95 text-center flex-shrink-0">
+            Continue ➔
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- 4. SCREEN: REMEDIATION & RETRY (SCORE < 80%)  -->
+    <!-- ============================================== -->
+    <section id="remediationScreen" class="hidden max-w-2xl mx-auto space-y-6 animate-fadeIn">
+      <div class="bg-amber-50 rounded-3xl p-6 sm:p-8 border-4 border-amber-300 shadow-xl text-center space-y-4">
+        <div class="w-20 h-20 mx-auto rounded-full bg-amber-200 text-amber-800 flex items-center justify-center text-4xl shadow-inner animate-bounce">
+          ⚠️
+        </div>
+        <h2 class="text-2xl sm:text-3xl font-black text-amber-950">
+          Let's Review Before Retrying!
+        </h2>
+        <p class="text-amber-800 text-sm sm:text-base font-semibold max-w-lg mx-auto leading-relaxed">
+          You scored <span id="remediationScoreText" class="font-black text-rose-600">60%</span>. To unlock your Official Certificate, you need at least <span class="font-black text-emerald-700">80%</span>.
+        </p>
+
+        <!-- Missed Concepts Highlight Container -->
+        <div class="bg-white rounded-2xl p-5 border-2 border-amber-200 text-left space-y-3">
+          <h4 class="font-black text-slate-800 text-sm flex items-center gap-2">
+            <i class="fa-solid fa-triangle-exclamation text-amber-500"></i> Missed Concepts Identified for You:
+          </h4>
+          <ul id="remediationMissedList" class="space-y-2 text-xs sm:text-sm font-bold text-slate-700">
+            <!-- Injected failed terms/concepts -->
+          </ul>
+        </div>
+
+        <button onclick="app.redirectToReviewWithRemediation()" class="w-full bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white font-black py-3.5 px-6 rounded-2xl shadow-lg transition transform active:scale-95 text-base">
+          🔍 Go Back & Study Highlighted Sections
+        </button>
+      </div>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- 5. SCREEN: DIPLOMA OF EXCELLENCE               -->
+    <!-- ============================================== -->
+    <section id="diplomaScreen" class="hidden max-w-4xl mx-auto space-y-6 animate-fadeIn">
+      <!-- Action Toolbar -->
+      <div class="flex items-center justify-between bg-white p-4 rounded-2xl border-2 border-slate-200 shadow-sm print:hidden">
+        <button onclick="app.showScreen('welcome')" class="bg-slate-100 hover:bg-slate-200 font-bold text-xs px-4 py-2 rounded-xl transition">
+          <i class="fa-solid fa-arrow-left mr-1"></i> Return to Road Map
+        </button>
+        <div class="flex items-center gap-2">
+          <button onclick="window.print()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs px-4 py-2 rounded-xl shadow transition active:scale-95 flex items-center gap-1.5">
+            <i class="fa-solid fa-print"></i> Print Diploma
+          </button>
+          <button onclick="diplomaManager.shareVictory()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs px-4 py-2 rounded-xl shadow transition active:scale-95 flex items-center gap-1.5">
+            <i class="fa-solid fa-trophy"></i> Celebrate!
+          </button>
+        </div>
+      </div>
+
+      <!-- Printable Certificate Container -->
+      <div id="printableDiploma" class="bg-white rounded-3xl p-8 sm:p-12 border-8 border-double border-amber-400 shadow-2xl relative overflow-hidden text-center space-y-6">
+        <!-- Background watermark emblem -->
+        <div class="absolute inset-0 flex items-center justify-center opacity-5 pointer-events-none">
+          <i class="fa-solid fa-certificate text-[300px]"></i>
+        </div>
+
+        <div class="space-y-2 relative z-10">
+          <div class="flex justify-center items-center gap-3">
+            <span class="text-4xl">🌟</span>
+            <span class="uppercase tracking-widest text-xs font-black text-amber-700 bg-amber-100 px-4 py-1 rounded-full border border-amber-300">
+              Department of Elementary Sciences
+            </span>
+            <span class="text-4xl">🌟</span>
+          </div>
+          <h1 class="text-3xl sm:text-5xl font-black text-slate-800 tracking-tight">
+            Certificate of Excellence
+          </h1>
+          <p class="text-slate-500 font-extrabold text-sm uppercase tracking-wider">
+            Natural Resources & The Environment Master
+          </p>
+        </div>
+
+        <!-- Student Recognition -->
+        <div class="space-y-3 relative z-10 py-2">
+          <p class="text-slate-600 text-sm font-semibold">This official diploma is proudly awarded to:</p>
+          <h2 id="diplomaStudentName" class="text-2xl sm:text-4xl font-black text-indigo-700 underline decoration-amber-400 decoration-wavy decoration-2">
+            Leo the Scientist
+          </h2>
+          <p class="text-slate-600 text-sm max-w-xl mx-auto font-medium">
+            For outstanding mastery of Natural Resources, Energy Conservation, Pollution Reduction, and Ecosystem Stewardship in Grade 5 Sciences.
+          </p>
+        </div>
+
+        <!-- Score & Avatar Seal -->
+        <div class="flex flex-wrap items-center justify-center gap-8 py-4 relative z-10">
+          <div class="text-center">
+            <span class="text-xs font-extrabold text-slate-400 uppercase">Unit Completed</span>
+            <p id="diplomaChapterName" class="text-base font-black text-slate-800">Unit 1: Natural Resources</p>
+          </div>
+          
+          <div class="w-20 h-20 rounded-full bg-gradient-to-tr from-amber-400 to-yellow-300 p-1 shadow-lg flex items-center justify-center">
+            <div id="diplomaAvatarPreview" class="w-full h-full bg-white rounded-full flex items-center justify-center text-3xl shadow-inner">
+              🧑‍🔬
+            </div>
+          </div>
+
+          <div class="text-center">
+            <span class="text-xs font-extrabold text-slate-400 uppercase">Academic Score</span>
+            <p id="diplomaFinalScore" class="text-2xl font-black text-emerald-600">100%</p>
+          </div>
+        </div>
+
+        <!-- Official Signatures Footer -->
+        <div class="pt-6 border-t-2 border-slate-200 flex flex-wrap items-end justify-between text-left text-xs font-bold text-slate-500 relative z-10 gap-4">
+          <div>
+            <p class="text-slate-400 uppercase font-extrabold">Issued Date</p>
+            <p id="diplomaDateText" class="text-slate-700 font-black">September 26, 2026</p>
+          </div>
+          
+          <div class="text-center sm:text-right">
+            <div class="font-serif italic text-lg sm:text-xl font-bold text-indigo-900 border-b-2 border-slate-400 pb-1 px-4">
+              Ing. Milko Gonzales C.
+            </div>
+            <p class="text-slate-500 text-[11px] uppercase tracking-wider font-extrabold pt-1">
+              Senior EdTech Instructional Designer
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ============================================== -->
+  <!-- COMPONENT: INTERACTIVE MASCOT GUIDE            -->
+  <!-- ============================================== -->
+  <aside id="mascotGuideWidget" class="fixed bottom-3 left-3 sm:bottom-4 sm:left-4 z-40 flex items-end gap-1.5 sm:gap-2 group pointer-events-auto">
+    <!-- Character Avatar Bubble Button -->
+    <button onclick="mascot.repeatVoice()" class="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl sm:rounded-3xl bg-gradient-to-tr from-emerald-400 to-teal-500 hover:from-emerald-500 hover:to-teal-600 text-white shadow-2xl flex items-center justify-center text-xl sm:text-3xl border-2 sm:border-4 border-white transition transform active:scale-95 bounce-subtle flex-shrink-0" title="Click to repeat audio!">
+      <span id="mascotIcon">🦜</span>
+    </button>
+  </aside>
+
+  <!-- ============================================================== -->
+  <!-- MODAL / DEDICATED SEPARATE WINDOW: B-01 FLY-IN INTRO CINEMATIC -->
+  <!-- ============================================================== -->
+  <div id="robotIntroModal" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-lg flex items-center justify-center p-2 sm:p-4">
+    <div class="relative w-full max-w-4xl h-[94vh] sm:h-[88vh] bg-gradient-to-b from-sky-400 via-sky-300 to-indigo-100 rounded-3xl sm:rounded-[36px] overflow-hidden shadow-2xl border-4 sm:border-8 border-white/80 flex flex-col justify-end">
+
+      <!-- Center 3D WebGL Canvas Layer (B-01 Mekorama flying in) -->
+      <div class="absolute inset-0 z-10">
+        <canvas id="mekoramaCanvas" class="w-full h-full block cursor-crosshair touch-none"></canvas>
+      </div>
+
+      <!-- Bottom Interactive Action Button (Hidden completely while flying in and during trash cleanup) -->
+      <div id="robotBottomHud" class="relative z-20 p-4 sm:p-8 flex items-center justify-center pointer-events-none max-w-xl mx-auto w-full transition-all duration-700 opacity-0 translate-y-6">
+        <!-- Enter Program Button -->
+        <div class="pointer-events-auto flex items-center justify-center w-full sm:w-auto">
+          <button id="enterAppBtn" onclick="robotIntroManager.dismissIntro()" class="w-full sm:w-auto bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-600 hover:from-emerald-600 hover:to-cyan-700 text-white font-black text-base sm:text-xl px-10 py-4 rounded-2xl sm:rounded-3xl shadow-2xl transition transform active:scale-95 flex items-center justify-center gap-3 border-2 border-white/60">
+            <span>Enter EcoQuest Laboratory! 🚀</span>
+            <i class="fa-solid fa-arrow-right"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL: IMMERSIVE CHAPTER INTRO VIDEO           -->
+  <!-- ============================================== -->
+  <div id="videoModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+    <div class="bg-slate-900 border-2 sm:border-4 border-emerald-400 rounded-2xl sm:rounded-3xl max-w-2xl w-full p-4 sm:p-6 text-white shadow-2xl space-y-3 sm:space-y-5 text-center relative animate-fadeIn max-h-[95vh] overflow-y-auto">
+      
+      <div class="space-y-1">
+        <span class="text-[10px] sm:text-xs font-black uppercase tracking-wider text-emerald-400 bg-emerald-950/80 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full border border-emerald-700">
+          Mission Briefing
+        </span>
+        <h3 id="videoModalTitle" class="text-lg sm:text-2xl font-black text-white">
+          Unit 1: The Treasure of Natural Resources
+        </h3>
+      </div>
+
+      <!-- Immersive Video Screen (No browser controls) -->
+      <div class="relative w-full aspect-video rounded-xl sm:rounded-2xl overflow-hidden bg-black border sm:border-2 border-slate-700 shadow-inner flex items-center justify-center">
+        <!-- Native video element for real MP4 playback without browser controls -->
+        <video id="unitVideoPlayer" class="hidden w-full h-full object-cover" playsinline loop></video>
+        <!-- Canvas-based cinematic simulated animated fallback for units without dedicated video -->
+        <canvas id="videoCinematicCanvas" class="w-full h-full block"></canvas>
+      </div>
+
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-3 pt-1 sm:pt-2">
+        <span class="text-[11px] sm:text-xs text-slate-400 font-semibold text-center sm:text-left">
+          Watch the mission video to prepare for your laboratory challenge!
+        </span>
+        <!-- Single Clear Action Button to Continue -->
+        <button id="closeVideoBtn" onclick="app.closeVideoAndStartLab()" class="w-full sm:w-auto bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-black text-xs sm:text-sm px-5 py-2.5 sm:px-6 sm:py-3 rounded-xl sm:rounded-2xl shadow-lg transition active:scale-95 flex items-center justify-center gap-2">
+          <span>Start Learning!</span>
+          <i class="fa-solid fa-arrow-right"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL: DEDICATED CONCEPT DETAIL & MINI-CANVAS  -->
+  <!-- ============================================== -->
+  <div id="conceptModal" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 text-slate-800 shadow-2xl space-y-4 border-4 border-indigo-300 animate-fadeIn">
+      <div class="flex items-center justify-between border-b pb-3">
+        <h3 id="conceptModalTitle" class="text-xl font-black text-indigo-900">Concept Title</h3>
+        <button onclick="conceptManager.closeModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold flex items-center justify-center">
+          ✕
+        </button>
+      </div>
+
+      <!-- Dedicated Mini Canvas Animation for Concept -->
+      <div class="w-full h-48 bg-slate-900 rounded-2xl overflow-hidden border border-slate-700 relative">
+        <canvas id="conceptMiniCanvas" class="w-full h-full block"></canvas>
+      </div>
+
+      <p id="conceptModalDescription" class="text-sm text-slate-600 font-medium leading-relaxed">
+        Description text goes here...
+      </p>
+
+      <div class="pt-2 flex justify-end">
+        <button onclick="conceptManager.closeModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs px-5 py-2.5 rounded-xl shadow active:scale-95">
+          Got It! 👍
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL: REWARD SHOP & AVATAR CUSTOMIZER        -->
+  <!-- ============================================== -->
+  <div id="shopModal" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-xl w-full p-6 text-slate-800 shadow-2xl space-y-6 border-4 border-purple-300 animate-fadeIn max-h-[90vh] overflow-y-auto">
+      
+      <div class="flex items-center justify-between border-b pb-3">
+        <div class="flex items-center gap-2">
+          <span class="text-3xl">🛍️</span>
+          <div>
+            <h3 class="text-2xl font-black text-purple-950">Eco Rewards Shop</h3>
+            <p class="text-xs text-slate-500 font-bold">Exchange your hard-earned candies for cool avatars & power-ups!</p>
+          </div>
+        </div>
+        <button onclick="shop.closeModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold flex items-center justify-center">
+          ✕
+        </button>
+      </div>
+
+      <!-- Candies Balance Display -->
+      <div class="bg-purple-50 border-2 border-purple-200 rounded-2xl p-4 flex items-center justify-between">
+        <span class="text-xs font-extrabold text-purple-900 uppercase">Available Candies:</span>
+        <div class="flex items-center gap-1.5 text-2xl font-black text-amber-600">
+          <span>🍬</span>
+          <span id="shopCandyBalance">0</span>
+        </div>
+      </div>
+
+      <!-- Shop Items List -->
+      <div class="space-y-4">
+        <h4 class="text-xs font-black uppercase text-slate-400 tracking-wider">Scientist Avatars & Hats</h4>
+        <div id="shopAvatarsGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+          <!-- Populated dynamically -->
+        </div>
+
+        <h4 class="text-xs font-black uppercase text-slate-400 tracking-wider pt-2">Power-Ups</h4>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <!-- Heart Refill -->
+          <div class="border-2 border-slate-200 rounded-2xl p-3 flex items-center justify-between bg-rose-50/50">
+            <div class="flex items-center gap-2">
+              <span class="text-2xl">❤️</span>
+              <div>
+                <p class="font-bold text-xs text-slate-800">Full Hearts Refill</p>
+                <p class="text-[10px] text-slate-500">Restore 5 hearts</p>
+              </div>
+            </div>
+            <button onclick="shop.buyHeartRefill()" class="bg-rose-500 hover:bg-rose-600 text-white font-extrabold text-xs px-3 py-1.5 rounded-xl shadow active:scale-95">
+              10 🍬
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="pt-2 text-center">
+        <button onclick="shop.closeModal()" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-black text-sm py-3 rounded-2xl shadow-md transition active:scale-95">
+          Done Shopping ✨
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page Footer -->
+  <footer class="bg-white border-t-2 border-slate-200 py-4 px-6 text-center text-xs font-bold text-slate-500">
+    <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
+      <p>5th Sciences: Natural Resources & Environment • Gamified EdTech Simulator</p>
+      <p class="text-slate-600 font-extrabold">Author / Architect: <span class="text-indigo-600">Ing. Milko Gonzales C.</span></p>
+    </div>
+  </footer>
+
+  <!-- ============================================== -->
+  <!-- JAVASCRIPT: LOGIC, AUDIO, LABS & DATA ENGINE   -->
+  <!-- ============================================== -->
+  <script>
+    /* Prevent uncaught promise rejections from video play() interruptions */
+    window.addEventListener('unhandledrejection', (event) => {
+      if (event.reason && (event.reason.name === 'AbortError' || event.reason.message?.includes('pause()'))) {
+        event.preventDefault();
+      }
+    });
+
+    /* Safe video playback helpers to avoid AbortError when pause() is called while play() is pending */
+    function safePlayVideo(video) {
+      if (!video) return;
+      const promise = video.play();
+      if (promise !== undefined) {
+        promise.catch((err) => {
+          if (err.name === 'AbortError') {
+            // Expected when pause() is called during loading/navigation; safely ignore
+            return;
+          }
+          if (err.name === 'NotAllowedError') {
+            // Autoplay with audio was blocked by browser policy; fallback to muted play
+            video.muted = true;
+            video.play().catch(() => {});
+          }
+        });
+      }
+    }
+
+    function safePauseVideo(video) {
+      if (!video) return;
+      try {
+        video.pause();
+      } catch (e) {
+        // Ignore any sync pause issues
+      }
+    }
+
+    /* Mandatory Google Sheets Integration Endpoint */
+    const ENDPOINT_URL = "https://script.google.com/macros/s/AKfycbyAq9DVA2ee7Vtge9vND5PeucQposM_rYbup_nkP4DSvBxAkYmVBDcSeM3FefSy1g9x/exec";
+
+    /* Mandatory Save Results to Google Sheets Function */
+    function saveResultsToExcel(userName, scorePercentage) {
+      const data = {
+        name: userName,
+        grade: "5th sciences N Resurces Eviroment",
+        testResult: scorePercentage, // e.g. "100%" or "85%"
+        date: new Date().toLocaleString()
+      };
+
+      fetch(ENDPOINT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 
+          'Content-Type': 'application/json' 
+        },
+        body: JSON.stringify(data)
+      })
+      .then(() => {
+        console.log("Datos registrados con éxito para 5th sciences N Resurces Eviroment");
+      })
+      .catch(err => {
+        console.error("Error al registrar en Google Sheets:", err);
+      });
+    }
+
+    const CHAPTERS_DATA = {
+      1: {
+        id: 1,
+        title: "Unit 1: Natural Resources",
+        subtitle: "Energy Sources (Fossil Fuels & Renewables) and Material Resources",
+        badge: "⚡ Ch. 1: Natural Resources",
+        videoUrl: "https://raw.githubusercontent.com/Milko-arch/5video-natural-resources/9675822798999d3ee96bcf91562d5db72283c32e/natural%20resources.mp4",
+        introVideoText: "Natural resources are materials from the environment that are useful to people! Energy keeps our world moving, while material resources like soil, water, air, and rocks keep us alive!",
+        simModes: [
+          { 
+            id: "sim_ch1_solar", 
+            label: "Solar Energy", 
+            icon: "☀️", 
+            description: "Solar cells change sunlight directly into electricity without air pollution!",
+            videoUrl: "https://raw.githubusercontent.com/Milko-arch/5video-natural-resources/8174c3640de63944b2620c09091a3e6e139ae839/solar%20energy.mp4"
+          },
+          { id: "sim_ch1_wind", label: "Wind Turbine", icon: "💨", description: "Moving air spins the windmill blades, turning a generator to create electricity!" },
+          { id: "sim_ch1_hydro", label: "Hydro Dam", icon: "🌊", description: "Water held behind the dam rushes through openings to spin a turbine and generator!" },
+          { id: "sim_ch1_fossil", label: "Fossil Fuel Plant", icon: "🛢️", description: "Burning coal, oil, and natural gas makes steam to spin generators, but it takes millions of years to form!" }
+        ],
+        concepts: [
+          {
+            id: "c_renewable",
+            title: "Renewable Resources",
+            icon: "🔄",
+            summary: "Resources nature can produce again and again like sunlight, wind, and fresh water.",
+            detail: "Solar energy, wind energy, moving water, and trees are renewable. If we are careful, we will not run out of these resources!"
+          },
+          {
+            id: "c_nonrenewable",
+            title: "Nonrenewable Resources",
+            icon: "⏳",
+            summary: "Resources that cannot be replaced quickly enough by nature once used up.",
+            detail: "Fossil fuels (oil, coal, natural gas) formed from decayed remains of ancient plants and animals trapped under layers of rock for millions of years."
+          },
+          {
+            id: "c_materials",
+            title: "Material Resources",
+            icon: "⛏️",
+            summary: "Soil, fresh water, clean air, rocks, and minerals used to make food and tools.",
+            detail: "Granite and marble build monuments like the Lincoln Memorial. Copper is pulled into wires for electricity, and gold is molded into jewelry."
+          }
+        ],
+        glossary: [
+          { id: "term_natural_resources", term: "Natural Resources", definition: "Materials found in the environment that are useful to people." },
+          { id: "term_nonrenewable", term: "Nonrenewable", definition: "A resource that cannot be replaced quickly enough by nature once used up." },
+          { id: "term_renewable", term: "Renewable", definition: "A resource that nature can produce again and again." },
+          { id: "term_fossil_fuels", term: "Fossil Fuels", definition: "Fuels like coal, oil, and natural gas formed from ancient organisms over millions of years." },
+          { id: "term_geothermal", term: "Geothermal Energy", definition: "Heat energy from hot melted rock deep below the Earth's surface." }
+        ],
+        quiz: [
+          {
+            id: "q1_1",
+            conceptId: "c_renewable",
+            termId: "term_renewable",
+            question: "Which of the following is considered a renewable energy resource?",
+            options: ["Coal", "Solar Energy (Sunlight)", "Petroleum Oil", "Natural Gas"],
+            correct: 1,
+            explanation: "Sunlight is renewable because people will never run out of sunlight!"
+          },
+          {
+            id: "q1_2",
+            conceptId: "c_nonrenewable",
+            termId: "term_fossil_fuels",
+            question: "Why are coal, oil, and natural gas called fossil fuels?",
+            options: [
+              "They are made from melted dinosaur rocks",
+              "They formed from decayed remains of ancient organisms over millions of years",
+              "They are created instantly inside volcanoes",
+              "They do not produce any heat energy"
+            ],
+            correct: 1,
+            explanation: "Fossil fuels formed from decayed ancient plants and animals trapped under rock layers."
+          },
+          {
+            id: "q1_3",
+            conceptId: "c_renewable",
+            termId: "term_natural_resources",
+            question: "What machine inside a dam or windmill turns to spin a generator that makes electricity?",
+            options: ["A turbine with blades", "A solar cell", "A catalytic converter", "A landfill drain"],
+            correct: 0,
+            explanation: "Water or wind turns the blades of a turbine, which spins a rod connected to a generator."
+          },
+          {
+            id: "q1_4",
+            conceptId: "c_materials",
+            termId: "term_geothermal",
+            question: "What type of energy uses heat from hot melted rock deep inside the Earth?",
+            options: ["Nuclear energy", "Geothermal energy", "Gasohol", "Peat fuel"],
+            correct: 1,
+            explanation: "Geo means Earth, and thermal means heat: Geothermal energy comes from Earth's deep heat!"
+          },
+          {
+            id: "q1_5",
+            conceptId: "c_materials",
+            termId: "term_natural_resources",
+            question: "Which mineral is widely used for electrical wires because it conducts electricity well?",
+            options: ["Granite", "Sand", "Copper", "Slate"],
+            correct: 2,
+            explanation: "Copper is a metallic mineral that conducts electricity and can be drawn into thin wires."
+          }
+        ]
+      },
+
+      2: {
+        id: 2,
+        title: "Unit 2: Pollution & Wastes",
+        subtitle: "Landfills, Incinerators, Air Smog, Acid Rain, and Water Contamination",
+        badge: "🏭 Ch. 2: Pollution",
+        videoUrl: "https://raw.githubusercontent.com/Milko-arch/5video-natural-resources/40421071e0c56b8e429a9d5a063395f3e595096c/pollution%20and%20wastes.mp4",
+        introVideoText: "Pollution is anything in the environment that can harm living things or damage natural resources! Humans generate garbage, smoke, and chemicals that must be treated carefully!",
+        simModes: [
+          { id: "sim_ch2_landfill", label: "Sanitary Landfill", icon: "🚜", description: "Lined with clay, plastic, and drains to prevent harmful leachate from poisoning groundwater!" },
+          { id: "sim_ch2_incinerator", label: "Incinerator & Scrubbers", icon: "🔥", description: "Burns trash to generate steam and electricity, while scrubbers clean smoke particles!" },
+          { id: "sim_ch2_acidrain", label: "Acid Rain Simulator", icon: "🌧️", description: "Gases from factories and cars combine with water vapor to form acid rain that dissolves stone monuments!" },
+          { id: "sim_ch2_water", label: "Water Cleanup", icon: "🚰", description: "Removing sewage, industrial chemicals, and oil spills to protect fish and drinking water supplies!" }
+        ],
+        concepts: [
+          {
+            id: "c_landfill",
+            title: "Sanitary Landfill",
+            icon: "🚜",
+            summary: "Modern engineered landfill lined with clay and plastic to keep toxins out of groundwater.",
+            detail: "Bulldozers press garbage into thin layers and cover it with soil. Vent pipes allow explosive methane gas to escape safely."
+          },
+          {
+            id: "c_acidrain",
+            title: "Acid Rain & Monuments",
+            icon: "🏛️",
+            summary: "Chemical gases reacting with clouds produce acids that dissolve stone and metals.",
+            detail: "Acid rain has damaged the metal on the Statue of Liberty, killed fish in Northeastern ponds, and stunted forest trees."
+          },
+          {
+            id: "c_scrubbers",
+            title: "Scrubbers & Converters",
+            icon: "🧼",
+            summary: "Devices installed in factories and cars that remove pollutants before entering the air.",
+            detail: "Catalytic converters turn harmful exhaust into harmless carbon dioxide and water. Scrubbers wash smokestacks clean."
+          }
+        ],
+        glossary: [
+          { id: "term_pollution", term: "Pollution", definition: "Anything in the environment that can harm living things or damage resources." },
+          { id: "term_litter", term: "Litter", definition: "Garbage thrown improperly onto streets, playgrounds, or vacant lots." },
+          { id: "term_sanitary_landfill", term: "Sanitary Landfill", definition: "A carefully lined hole in the ground built to isolate waste from soil and groundwater." },
+          { id: "term_incinerator", term: "Incinerator", definition: "A large furnace engineered for burning waste materials into ash." },
+          { id: "term_acid_rain", term: "Acid Rain", definition: "Rain that contains unhealthy amounts of acid from air pollution." }
+        ],
+        quiz: [
+          {
+            id: "q2_1",
+            conceptId: "c_landfill",
+            termId: "term_sanitary_landfill",
+            question: "Why are sanitary landfills lined with packed clay and plastic layers?",
+            options: [
+              "To make the garbage smell like flowers",
+              "To keep harmful chemicals from leaking into soil and drinking groundwater",
+              "To make garbage freeze permanently",
+              "To allow trees to grow beneath the trash"
+            ],
+            correct: 1,
+            explanation: "Packed clay and plastic act as an impermeable liner preventing leachate from entering groundwater."
+          },
+          {
+            id: "q2_2",
+            conceptId: "c_scrubbers",
+            termId: "term_incinerator",
+            question: "What device is installed in factory smokestacks and incinerators to remove harmful particles?",
+            options: ["Solar cell", "Scrubber", "Litter bin", "Water turbine"],
+            correct: 1,
+            explanation: "Scrubbers wash and capture harmful particles and toxic gases before smoke escapes."
+          },
+          {
+            id: "q2_3",
+            conceptId: "c_acidrain",
+            termId: "term_acid_rain",
+            question: "What historic monument was damaged by acid rain and needed extensive repairs?",
+            options: ["The Eiffel Tower", "The Statue of Liberty", "The Golden Gate Bridge", "Mount Rushmore"],
+            correct: 1,
+            explanation: "The metal on the Statue of Liberty in New York Harbor was damaged by acidic rain."
+          },
+          {
+            id: "q2_4",
+            conceptId: "c_landfill",
+            termId: "term_pollution",
+            question: "What explosive gas produced by bacteria in landfills must escape through vent pipes?",
+            options: ["Oxygen", "Nitrogen", "Methane", "Ozone"],
+            correct: 2,
+            explanation: "Methane is an explosive gas generated when bacteria decompose organic waste in landfills."
+          },
+          {
+            id: "q2_5",
+            conceptId: "c_scrubbers",
+            termId: "term_pollution",
+            question: "What automobile exhaust part converts toxic gases into harmless carbon dioxide and water?",
+            options: ["Car battery", "Catalytic converter", "Radiator", "Fuel tank"],
+            correct: 1,
+            explanation: "A catalytic converter changes harmful exhaust gases into less harmful carbon dioxide and water."
+          }
+        ]
+      },
+
+      3: {
+        id: 3,
+        title: "Unit 3: Conserving Resources",
+        subtitle: "The 3 R's, Composting, Habitat Restoration, and Endangered Species Protection",
+        badge: "🦅 Ch. 3: Conservation",
+        videoUrl: "https://raw.githubusercontent.com/Milko-arch/5video-natural-resources/40421071e0c56b8e429a9d5a063395f3e595096c/conserving%20resources.mp4",
+        introVideoText: "Conservation is the wise use and protection of natural resources! We can practice the 3 R's: Reduce, Reuse, Recycle, make rich compost, and defend endangered wildlife!",
+        simModes: [
+          { id: "sim_ch3_recycle", label: "The 3 R's Sorter", icon: "♻️", description: "Sort glass bottles, plastic jugs, aluminum cans, and newspapers into proper recycling streams!" },
+          { id: "sim_ch3_compost", label: "Compost Bin", icon: "🍂", description: "Layer food scraps, fallen leaves, and soil to produce nutrient-rich humus for gardens!" },
+          { id: "sim_ch3_habitat", label: "Habitat Sanctuary", icon: "🌲", description: "Replant trees and restore wetlands so wolves and birds can thrive without habitat destruction!" },
+          { id: "sim_ch3_condor", label: "Condor Breeding", icon: "🦅", description: "Protect endangered California condors through captive breeding and safe wildlife refuges!" }
+        ],
+        concepts: [
+          {
+            id: "c_3rs",
+            title: "Reduce, Reuse, Recycle",
+            icon: "♻️",
+            summary: "The three golden rules of resource conservation to reduce waste sent to landfills.",
+            detail: "Reduce means buying less packaging. Reuse means using washable bottles and cloth grocery bags. Recycle melts aluminum and molds plastics into new items."
+          },
+          {
+            id: "c_compost",
+            title: "Composting Magic",
+            icon: "🌱",
+            summary: "A mixture of soil and decayed organic matter providing nutrients for plants.",
+            detail: "Layer fruit scraps, vegetable peels, coffee grounds, and dry leaves with soil. In a few months, worms and bacteria turn it into dark, fertile garden food!"
+          },
+          {
+            id: "c_wildlife",
+            title: "Endangered Species Act",
+            icon: "🐾",
+            summary: "Laws protecting species facing extinction and creating wildlife sanctuaries.",
+            detail: "Passed in 1973. Endangered species are close to extinction; threatened species could become endangered. Captive breeding saved the California condor from just 22 birds!"
+          }
+        ],
+        glossary: [
+          { id: "term_conservation", term: "Conservation", definition: "The wise use and protection of natural resources." },
+          { id: "term_compost", term: "Compost", definition: "A mixture of soil and decayed organic material that provides rich nutrients for plants." },
+          { id: "term_organism", term: "Organism", definition: "Any living thing, such as a plant, animal, fungus, or bacterium." },
+          { id: "term_habitat", term: "Habitat", definition: "The natural environment where an organism lives, such as a forest or stream." },
+          { id: "term_extinction", term: "Extinction", definition: "The permanent dying out of a species when its last surviving member dies." }
+        ],
+        quiz: [
+          {
+            id: "q3_1",
+            conceptId: "c_3rs",
+            termId: "term_conservation",
+            question: "What is the wise use and protection of natural resources called?",
+            options: ["Pollution", "Conservation", "Extinction", "Erosion"],
+            correct: 1,
+            explanation: "Conservation is the wise use and careful protection of all our natural resources."
+          },
+          {
+            id: "q3_2",
+            conceptId: "c_3rs",
+            termId: "term_conservation",
+            question: "Which of the 3 R's does taking reusable cloth grocery bags to the store represent?",
+            options: ["Refusing", "Reusing", "Incinerating", "Fossilizing"],
+            correct: 1,
+            explanation: "Reusing bags saves trees (paper) and petroleum oil (plastics) from being used repeatedly."
+          },
+          {
+            id: "q3_3",
+            conceptId: "c_compost",
+            termId: "term_compost",
+            question: "What materials can safely be added to a home compost pile?",
+            options: [
+              "Plastic soda bottles and batteries",
+              "Fruit and vegetable scraps, leaves, and coffee grounds",
+              "Metal aluminum cans and glass jars",
+              "Styrofoam and engine oil"
+            ],
+            correct: 1,
+            explanation: "Organic food scraps, leaves, eggshells, and soil decay naturally to create rich plant compost."
+          },
+          {
+            id: "q3_4",
+            conceptId: "c_wildlife",
+            termId: "term_extinction",
+            question: "What happens when the very last member of an animal or plant species dies?",
+            options: ["Captive breeding", "Sanctuary protection", "Extinction", "Adaptation"],
+            correct: 2,
+            explanation: "Extinction occurs when no living members of a species remain on Earth."
+          },
+          {
+            id: "q3_5",
+            conceptId: "c_wildlife",
+            termId: "term_habitat",
+            question: "How did scientists save the endangered California condor when only 22 birds remained in 1982?",
+            options: [
+              "Through captive breeding in zoos and wildlife centers",
+              "By building a giant shopping mall over their nests",
+              "By logging all surrounding forest trees",
+              "By feeding them plastic packaging"
+            ],
+            correct: 0,
+            explanation: "Scientists captured the remaining condors for captive breeding and later released their healthy offspring into the wild."
+          }
+        ]
+      }
+    };
+
+    class SoundEngine {
+      constructor() {
+        this.ctx = null;
+      }
+      init() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          this.ctx = new AudioContext();
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      }
+      playTone(freq, type = 'sine', duration = 0.15, gainVal = 0.1) {
+        try {
+          this.init();
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = type;
+          osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+          gain.gain.setValueAtTime(gainVal, this.ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + duration);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start();
+          osc.stop(this.ctx.currentTime + duration);
+        } catch (e) {
+          console.warn("Audio Context note muted or unavailable", e);
+        }
+      }
+      correct() {
+        this.playTone(523.25, 'triangle', 0.12, 0.15); // C5
+        setTimeout(() => this.playTone(659.25, 'triangle', 0.12, 0.15), 100); // E5
+        setTimeout(() => this.playTone(783.99, 'triangle', 0.25, 0.2), 200); // G5
+      }
+      wrong() {
+        this.playTone(261.63, 'sawtooth', 0.2, 0.15);
+        setTimeout(() => this.playTone(220.00, 'sawtooth', 0.35, 0.15), 150);
+      }
+      click() {
+        this.playTone(800, 'sine', 0.05, 0.08);
+      }
+      winFanfare() {
+        [440, 554, 659, 880].forEach((freq, idx) => {
+          setTimeout(() => this.playTone(freq, 'square', 0.2, 0.12), idx * 120);
+        });
+      }
+    }
+    const sfx = new SoundEngine();
+
+    class SpeechController {
+      constructor() {
+        this.synth = window.speechSynthesis;
+        this.isMuted = false;
+        this.speedMode = 'normal'; // 'normal' = 0.92, 'turtle' = 0.80
+        this.rates = { normal: 0.92, turtle: 0.80 };
+        this.lastSpokenText = "Welcome to EcoQuest Grade 5 Science!";
+        this.selectedVoice = null;
+        this.initVoice();
+      }
+
+      initVoice() {
+        if (!this.synth) return;
+        const updateVoices = () => {
+          const voices = this.synth.getVoices();
+          // Prefer clear English accents (US, UK, Natural)
+          this.selectedVoice = voices.find(v => v.lang.startsWith('en') && (v.name.includes('Natural') || v.name.includes('Google') || v.name.includes('Samantha') || v.name.includes('David'))) || voices.find(v => v.lang.startsWith('en'));
+        };
+        updateVoices();
+        if (this.synth.onvoiceschanged !== undefined) {
+          this.synth.onvoiceschanged = updateVoices;
+        }
+      }
+
+      speak(text, onEndCallback = null) {
+        if (this.isMuted || !this.synth) return;
+        this.lastSpokenText = text;
+        mascot.setSpeech(text);
+
+        try {
+          if (this.synth.paused) {
+            this.synth.resume();
+          }
+          this.synth.cancel(); // Stop previous voice
+          const utterance = new SpeechSynthesisUtterance(text);
+          utterance.rate = this.rates[this.speedMode] || 0.92;
+          utterance.pitch = 1.05; // Slightly enthusiastic child-friendly pitch
+          utterance.lang = 'en-US';
+          if (this.selectedVoice) {
+            utterance.voice = this.selectedVoice;
+          }
+          if (onEndCallback) {
+            utterance.onend = onEndCallback;
+          }
+          this.synth.speak(utterance);
+        } catch (e) {
+          console.warn("Speech API error:", e);
+        }
+      }
+
+      silence() {
+        if (this.synth) {
+          this.synth.cancel();
+        }
+      }
+
+      toggleSpeed() {
+        sfx.click();
+        this.speedMode = this.speedMode === 'normal' ? 'turtle' : 'normal';
+        const icon = document.getElementById('speedIcon');
+        const label = document.getElementById('speedLabel');
+        if (this.speedMode === 'turtle') {
+          icon.textContent = '🐢';
+          label.textContent = 'Slow';
+          this.speak("Turtle speed activated. Listening carefully at slower rate.");
+        } else {
+          icon.textContent = '🐇';
+          label.textContent = 'Normal';
+          this.speak("Hare speed activated. Normal speech rate.");
+        }
+      }
+
+      toggleMute() {
+        sfx.click();
+        this.isMuted = !this.isMuted;
+        const muteIcon = document.getElementById('muteIcon');
+        if (this.isMuted) {
+          this.silence();
+          muteIcon.className = "fa-solid fa-volume-xmark text-slate-400";
+        } else {
+          muteIcon.className = "fa-solid fa-volume-high text-indigo-700";
+          this.speak("Sound unmuted. Ready to explore science!");
+        }
+      }
+
+      speakCurrentLabDescription() {
+        if (simManager.currentMode) {
+          this.speak(simManager.currentMode.description);
+        }
+      }
+    }
+    const audioManager = new SpeechController();
+
+    class MascotGuide {
+      constructor() {
+        this.bubble = document.getElementById('mascotBubble');
+        this.textEl = document.getElementById('mascotSpeechText');
+      }
+      setSpeech(text) {
+        if (this.textEl) {
+          this.textEl.textContent = text;
+        }
+      }
+      repeatVoice() {
+        sfx.click();
+        audioManager.speak(audioManager.lastSpokenText);
+      }
+    }
+    const mascot = new MascotGuide();
+
+    class SimulationManager {
+      constructor() {
+        this.canvas = document.getElementById('simCanvas');
+        this.ctx = this.canvas ? this.canvas.getContext('2d') : null;
+        this.animId = null;
+        this.chapterId = 1;
+        this.currentMode = null;
+        this.isPaused = false;
+        this.time = 0;
+        this.particles = [];
+        this.initResize();
+      }
+
+      initResize() {
+        if (!this.canvas) return;
+        const updateSize = () => {
+          const rect = this.canvas.getBoundingClientRect();
+          this.canvas.width = rect.width;
+          this.canvas.height = rect.height;
+        };
+        window.addEventListener('resize', updateSize);
+        window.addEventListener('orientationchange', () => setTimeout(updateSize, 200));
+        setTimeout(updateSize, 100);
+      }
+
+      setChapter(chId) {
+        this.chapterId = chId;
+        const chapter = CHAPTERS_DATA[chId];
+        this.currentMode = chapter.simModes[0];
+        this.renderButtons(chapter.simModes);
+        this.resetParticles();
+        this.applyModeMedia(this.currentMode);
+        this.startLoop();
+      }
+
+      renderButtons(modes) {
+        const container = document.getElementById('simControlButtonsContainer');
+        if (!container) return;
+        container.innerHTML = '';
+
+        modes.forEach((mode, idx) => {
+          const btn = document.createElement('button');
+          btn.id = mode.id; // Unique HTML ID required
+          btn.className = `sim-btn p-3 rounded-2xl font-black text-xs sm:text-sm flex flex-col items-center justify-center gap-1 transition-all duration-200 active:scale-95 ${
+            idx === 0
+              ? 'bg-gradient-to-tr from-emerald-500 to-teal-500 text-white ring-4 ring-emerald-300 shadow-xl scale-105 border-2 border-white'
+              : 'bg-slate-800 hover:bg-slate-700 text-slate-300 border-2 border-slate-700'
+          }`;
+          btn.innerHTML = `<span class="text-2xl">${mode.icon}</span><span>${mode.label}</span>`;
+          btn.onclick = () => this.switchMode(mode, btn);
+          container.appendChild(btn);
+        });
+
+        this.updateHud();
+      }
+
+      applyModeMedia(mode) {
+        const simVid = document.getElementById('simVideoPlayer');
+        if (!simVid || !this.canvas) return;
+
+        // Clear any previous onended handlers
+        simVid.onended = null;
+
+        if (mode && mode.videoUrl) {
+          // Play real video with sound and without any overlay letters
+          this.canvas.classList.add('hidden');
+          simVid.classList.remove('hidden');
+          simVid.removeAttribute('loop'); // Ensure it plays once
+          simVid.loop = false;
+          simVid.muted = false; // Video is unmuted (with sound)
+
+          // Silence voice narration while video plays
+          audioManager.silence();
+
+          // When video finishes playing, stop and then speak the explanation
+          simVid.onended = () => {
+            safePauseVideo(simVid);
+            audioManager.speak(mode.description);
+          };
+
+          const directUrl = mode.videoUrl.replace('github.com/', 'raw.githubusercontent.com/').replace('/blob/', '/');
+          if (simVid.src !== directUrl) {
+            simVid.src = directUrl;
+          }
+          simVid.currentTime = 0;
+          safePlayVideo(simVid);
+        } else {
+          // Restore canvas graphics for standard simulations
+          safePauseVideo(simVid);
+          simVid.classList.add('hidden');
+          this.canvas.classList.remove('hidden');
+        }
+      }
+
+      switchMode(mode, targetBtn) {
+        sfx.click();
+        this.currentMode = mode;
+        this.resetParticles();
+
+        // Update active button state immediately
+        document.querySelectorAll('.sim-btn').forEach(b => {
+          b.className = 'sim-btn p-3 rounded-2xl font-black text-xs sm:text-sm flex flex-col items-center justify-center gap-1 transition-all duration-200 active:scale-95 bg-slate-800 hover:bg-slate-700 text-slate-300 border-2 border-slate-700';
+        });
+        targetBtn.className = 'sim-btn p-3 rounded-2xl font-black text-xs sm:text-sm flex flex-col items-center justify-center gap-1 transition-all duration-200 active:scale-95 bg-gradient-to-tr from-emerald-500 to-teal-500 text-white ring-4 ring-emerald-300 shadow-xl scale-105 border-2 border-white';
+
+        this.updateHud();
+        this.applyModeMedia(mode);
+        if (!mode.videoUrl) {
+          audioManager.speak(mode.description);
+        }
+      }
+
+      updateHud() {
+        const hudText = document.getElementById('hudStateText');
+        if (hudText && this.currentMode) {
+          hudText.textContent = `${this.currentMode.label} • ${this.currentMode.description.substring(0, 50)}...`;
+        }
+      }
+
+      togglePause() {
+        sfx.click();
+        this.isPaused = !this.isPaused;
+        const icon = document.getElementById('pausePlayIcon');
+        if (icon) {
+          icon.className = this.isPaused ? "fa-solid fa-play mr-1" : "fa-solid fa-pause mr-1";
+        }
+        const simVid = document.getElementById('simVideoPlayer');
+        if (simVid && !simVid.classList.contains('hidden')) {
+          if (this.isPaused) {
+            safePauseVideo(simVid);
+          } else {
+            safePlayVideo(simVid);
+          }
+        }
+      }
+
+      resetParticles() {
+        this.particles = [];
+        if (!this.canvas) return;
+        const w = this.canvas.width || 600;
+        const h = this.canvas.height || 340;
+        for (let i = 0; i < 35; i++) {
+          this.particles.push({
+            x: Math.random() * w,
+            y: Math.random() * h,
+            vx: (Math.random() - 0.5) * 2,
+            vy: Math.random() * 2 + 1,
+            size: Math.random() * 4 + 2,
+            color: ['#38bdf8', '#34d399', '#facc15', '#a78bfa'][Math.floor(Math.random() * 4)]
+          });
+        }
+      }
+
+      startLoop() {
+        if (this.animId) cancelAnimationFrame(this.animId);
+        const loop = () => {
+          if (!this.isPaused) {
+            this.time += 0.03;
+            this.draw();
+          }
+          this.animId = requestAnimationFrame(loop);
+        };
+        this.animId = requestAnimationFrame(loop);
+      }
+
+      draw() {
+        if (!this.ctx || !this.canvas || this.canvas.classList.contains('hidden')) return;
+        const ctx = this.ctx;
+        const w = this.canvas.width;
+        const h = this.canvas.height;
+        ctx.clearRect(0, 0, w, h);
+
+        // Backdrop sky gradient
+        const skyGrad = ctx.createLinearGradient(0, 0, 0, h);
+        skyGrad.addColorStop(0, '#0f172a');
+        skyGrad.addColorStop(0.65, '#1e293b');
+        skyGrad.addColorStop(1, '#0f231e');
+        ctx.fillStyle = skyGrad;
+        ctx.fillRect(0, 0, w, h);
+
+        const modeId = this.currentMode ? this.currentMode.id : '';
+
+        // Mode animations
+        if (modeId === 'sim_ch1_wind') {
+          // Rolling Green Hills
+          ctx.fillStyle = '#065f46';
+          ctx.beginPath();
+          ctx.arc(w * 0.25, h + 120, w * 0.45, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = '#047857';
+          ctx.beginPath();
+          ctx.arc(w * 0.75, h + 100, w * 0.5, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Animated Wind Streams
+          ctx.strokeStyle = 'rgba(56, 189, 248, 0.45)';
+          ctx.lineWidth = 3.5;
+          ctx.lineCap = 'round';
+          for (let i = 0; i < 6; i++) {
+            const y = 40 + i * 35;
+            const flowOffset = (this.time * 160 + i * 70) % (w + 140) - 70;
+            ctx.beginPath();
+            ctx.moveTo(flowOffset, y);
+            ctx.bezierCurveTo(flowOffset + 30, y - 8, flowOffset + 60, y + 8, flowOffset + 90, y);
+            ctx.stroke();
+          }
+
+          // Windmill Tower & Base
+          const cx = w * 0.45;
+          const cy = h * 0.48;
+          ctx.fillStyle = '#e2e8f0';
+          ctx.beginPath();
+          ctx.moveTo(cx - 10, h - 30);
+          ctx.lineTo(cx - 5, cy);
+          ctx.lineTo(cx + 5, cy);
+          ctx.lineTo(cx + 10, h - 30);
+          ctx.closePath();
+          ctx.fill();
+
+          // Nacelle / Generator Box
+          ctx.fillStyle = '#f59e0b';
+          ctx.fillRect(cx - 14, cy - 10, 28, 20);
+
+          // 3 Spinning Aerodynamic Blades
+          ctx.save();
+          ctx.translate(cx, cy);
+          ctx.rotate(this.time * 3);
+          for (let b = 0; b < 3; b++) {
+            ctx.rotate((Math.PI * 2) / 3);
+            ctx.fillStyle = '#ffffff';
+            ctx.shadowColor = 'rgba(0,0,0,0.2)';
+            ctx.shadowBlur = 6;
+            ctx.beginPath();
+            ctx.moveTo(-4, 0);
+            ctx.quadraticCurveTo(-6, -55, 0, -100);
+            ctx.quadraticCurveTo(6, -55, 4, 0);
+            ctx.closePath();
+            ctx.fill();
+            ctx.shadowBlur = 0;
+          }
+          // Center Hub
+          ctx.beginPath();
+          ctx.arc(0, 0, 11, 0, Math.PI * 2);
+          ctx.fillStyle = '#3b82f6';
+          ctx.fill();
+          ctx.restore();
+
+          // Power lines connecting turbine to house
+          const houseX = w * 0.82;
+          const houseY = h - 65;
+          ctx.strokeStyle = '#facc15';
+          ctx.lineWidth = 2;
+          ctx.setLineDash([6, 6]);
+          ctx.lineDashOffset = -this.time * 25;
+          ctx.beginPath();
+          ctx.moveTo(cx, cy);
+          ctx.quadraticCurveTo(w * 0.65, cy + 20, houseX, houseY - 15);
+          ctx.stroke();
+          ctx.setLineDash([]); // Reset line dash
+
+          // Cozy Lit House
+          ctx.fillStyle = '#b45309';
+          ctx.fillRect(houseX - 25, houseY - 15, 50, 45); // Body
+          // Roof
+          ctx.fillStyle = '#dc2626';
+          ctx.beginPath();
+          ctx.moveTo(houseX - 32, houseY - 15);
+          ctx.lineTo(houseX, houseY - 45);
+          ctx.lineTo(houseX + 32, houseY - 15);
+          ctx.closePath();
+          ctx.fill();
+          // Glowing Window (powered by wind!)
+          const lightGlow = (Math.sin(this.time * 5) + 1) * 0.2 + 0.8;
+          ctx.fillStyle = `rgba(250, 204, 21, ${lightGlow})`;
+          ctx.shadowColor = '#fde047';
+          ctx.shadowBlur = 15;
+          ctx.fillRect(houseX - 10, houseY - 2, 20, 20);
+          ctx.shadowBlur = 0;
+
+        } else if (modeId === 'sim_ch1_hydro') {
+          // Reservoir Body on the left
+          ctx.fillStyle = '#0284c7';
+          ctx.fillRect(0, 70, w * 0.42, h - 70);
+
+          // Dam Concrete Wall
+          ctx.fillStyle = '#64748b';
+          ctx.beginPath();
+          ctx.moveTo(w * 0.42, 60);
+          ctx.lineTo(w * 0.54, 60);
+          ctx.lineTo(w * 0.58, h);
+          ctx.lineTo(w * 0.42, h);
+          ctx.closePath();
+          ctx.fill();
+
+          // Penstock Pipe (water intake chute)
+          ctx.strokeStyle = '#334155';
+          ctx.lineWidth = 26;
+          ctx.beginPath();
+          ctx.moveTo(w * 0.38, h * 0.6);
+          ctx.lineTo(w * 0.56, h * 0.76);
+          ctx.stroke();
+
+          // Rushing Hydro Water Particles
+          ctx.fillStyle = '#38bdf8';
+          for (let p of this.particles) {
+            p.x += 4;
+            if (p.x > w) p.x = 20;
+            ctx.beginPath();
+            const waveY = (p.x < w * 0.42)
+              ? 85 + Math.sin(p.x * 0.04 + this.time * 4) * 8
+              : h * 0.76 + Math.sin(p.x * 0.08 + this.time * 5) * 6;
+            ctx.arc(p.x, waveY, p.size + 1, 0, Math.PI * 2);
+            ctx.fill();
+          }
+
+          // Spinning Water Turbine Wheel
+          const tx = w * 0.56;
+          const ty = h * 0.76;
+          ctx.save();
+          ctx.translate(tx, ty);
+          ctx.rotate(this.time * 6);
+          ctx.fillStyle = '#f59e0b';
+          for (let i = 0; i < 6; i++) {
+            ctx.rotate(Math.PI / 3);
+            ctx.fillRect(-5, -18, 10, 36);
+          }
+          ctx.beginPath();
+          ctx.arc(0, 0, 8, 0, Math.PI * 2);
+          ctx.fillStyle = '#ef4444';
+          ctx.fill();
+          ctx.restore();
+
+          // Generator on Top of Turbine
+          ctx.fillStyle = '#10b981';
+          ctx.fillRect(tx - 12, ty - 45, 24, 25);
+
+          // Flowing Tailrace River to the Right with swimming fish 🐟
+          ctx.fillStyle = '#0284c7';
+          ctx.fillRect(w * 0.56, h * 0.78, w * 0.44, h * 0.22);
+          const fishX = ((this.time * 60) % (w * 0.35)) + w * 0.6;
+          ctx.font = '18px sans-serif';
+          ctx.fillText('🐟', fishX, h * 0.88);
+
+        } else if (modeId === 'sim_ch1_fossil') {
+          // Underground Rock Layers (Bottom 45%)
+          const groundY = h * 0.55;
+          const layerH = (h - groundY) / 3;
+
+          // Soil layer
+          ctx.fillStyle = '#78350f';
+          ctx.fillRect(0, groundY, w, layerH);
+          // Ancient Rock Layer with dinosaur & fern fossil
+          ctx.fillStyle = '#451a03';
+          ctx.fillRect(0, groundY + layerH, w, layerH);
+          // Fossil icons embedded in rock
+          ctx.font = '22px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText('🦖', w * 0.2, groundY + layerH * 0.7);
+          ctx.fillText('🌿', w * 0.35, groundY + layerH * 0.8);
+          ctx.fillText('🐚', w * 0.75, groundY + layerH * 0.7);
+
+          // Deep Oil & Coal Seam Layer
+          ctx.fillStyle = '#171717';
+          ctx.fillRect(0, groundY + layerH * 2, w, layerH);
+
+          // Power Plant Building on the ground
+          ctx.fillStyle = '#475569';
+          ctx.fillRect(w * 0.45, groundY - 80, 110, 80);
+
+          // Smokestack & Animated Smoke Particles
+          ctx.fillStyle = '#334155';
+          ctx.fillRect(w * 0.62, groundY - 130, 28, 50);
+
+          for (let p of this.particles) {
+            p.y -= 1.8;
+            p.x += Math.sin(this.time + p.y * 0.05) * 1.2;
+            if (p.y < 20) { p.y = groundY - 130; p.x = w * 0.62 + 14; }
+            ctx.fillStyle = 'rgba(156, 163, 175, 0.45)';
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.size * 2.2, 0, Math.PI * 2);
+            ctx.fill();
+          }
+
+          // Animated Roaring Furnace Fire inside Plant
+          const fireSize = Math.sin(this.time * 10) * 4;
+          ctx.fillStyle = '#f97316';
+          ctx.beginPath();
+          ctx.arc(w * 0.5, groundY - 25, 16 + fireSize, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = '#facc15';
+          ctx.beginPath();
+          ctx.arc(w * 0.5, groundY - 25, 10 + fireSize * 0.6, 0, Math.PI * 2);
+          ctx.fill();
+
+        } else if (modeId === 'sim_ch2_landfill') {
+          // 1. Sky & Surface
+          const surfaceY = h * 0.36;
+          ctx.fillStyle = '#1e293b';
+          ctx.fillRect(0, 0, w, surfaceY);
+
+          // Top park with trees and grass built over sealed landfill
+          ctx.fillStyle = '#15803d';
+          ctx.fillRect(0, surfaceY - 8, w, 8);
+          ctx.font = '18px sans-serif';
+          ctx.fillText('🌳', w * 0.15, surfaceY - 12);
+          ctx.fillText('🏡', w * 0.28, surfaceY - 12);
+          ctx.fillText('🌲', w * 0.85, surfaceY - 12);
+
+          // Excavated landfill basin
+          const pitLeft = w * 0.12;
+          const pitRight = w * 0.88;
+          const pitBottom = h - 22;
+
+          // Clay liner (brown/orange packed clay)
+          ctx.fillStyle = '#b45309';
+          ctx.beginPath();
+          ctx.moveTo(pitLeft - 18, surfaceY);
+          ctx.lineTo(pitLeft + 25, pitBottom + 12);
+          ctx.lineTo(pitRight - 25, pitBottom + 12);
+          ctx.lineTo(pitRight + 18, surfaceY);
+          ctx.lineTo(pitRight + 8, surfaceY);
+          ctx.lineTo(pitRight - 32, pitBottom + 3);
+          ctx.lineTo(pitLeft + 32, pitBottom + 3);
+          ctx.lineTo(pitLeft - 8, surfaceY);
+          ctx.closePath();
+          ctx.fill();
+
+          // High-density plastic membrane (black impervious line)
+          ctx.strokeStyle = '#020617';
+          ctx.lineWidth = 5;
+          ctx.beginPath();
+          ctx.moveTo(pitLeft - 8, surfaceY);
+          ctx.lineTo(pitLeft + 30, pitBottom);
+          ctx.lineTo(pitRight - 30, pitBottom);
+          ctx.lineTo(pitRight + 8, surfaceY);
+          ctx.stroke();
+
+          // Leachate drainage pipe along bottom
+          ctx.fillStyle = '#64748b';
+          ctx.fillRect(pitLeft + 45, pitBottom - 10, pitRight - pitLeft - 90, 8);
+          for (let holeX = pitLeft + 55; holeX < pitRight - 55; holeX += 20) {
+            ctx.fillStyle = '#0f172a';
+            ctx.fillRect(holeX, pitBottom - 8, 4, 4);
+          }
+
+          // Stratified compressed waste and soil layers
+          const layerCount = 4;
+          const layerThickness = (pitBottom - surfaceY - 18) / layerCount;
+          const trashIcons = ['📦', '🥫', '🧴', '📰', '🧻', '🥤', '🍌'];
+
+          for (let l = 0; l < layerCount; l++) {
+            const ly = surfaceY + (l * layerThickness);
+            // Waste layer
+            ctx.fillStyle = l % 2 === 0 ? '#3f3f46' : '#52525b';
+            ctx.fillRect(pitLeft + 32, ly, pitRight - pitLeft - 64, layerThickness * 0.72);
+            
+            // Random embedded trash icons
+            ctx.font = '12px sans-serif';
+            for (let i = 0; i < 4; i++) {
+              const iconIdx = (l + i * 2) % trashIcons.length;
+              ctx.fillText(trashIcons[iconIdx], pitLeft + 60 + i * 90, ly + layerThickness * 0.5);
+            }
+
+            // Compacted dirt cover on each layer
+            ctx.fillStyle = '#78350f';
+            ctx.fillRect(pitLeft + 32, ly + layerThickness * 0.72, pitRight - pitLeft - 64, layerThickness * 0.28);
+          }
+
+          // Animated Bulldozer driving back and forth pressing trash
+          const dozerX = pitLeft + 60 + (Math.sin(this.time * 2) * 0.5 + 0.5) * (pitRight - pitLeft - 180);
+          const dozerY = surfaceY + 12;
+          ctx.font = '28px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.save();
+          if (Math.cos(this.time * 2) < 0) {
+            ctx.scale(-1, 1);
+            ctx.fillText('🚜', -dozerX, dozerY);
+          } else {
+            ctx.fillText('🚜', dozerX, dozerY);
+          }
+          ctx.restore();
+
+          // Vertical Methane Gas Vent Pipes
+          const ventX1 = pitLeft + 90;
+          const ventX2 = pitRight - 90;
+          [ventX1, ventX2].forEach(vx => {
+            ctx.fillStyle = '#94a3b8';
+            ctx.fillRect(vx - 4, surfaceY - 35, 8, pitBottom - surfaceY + 10);
+            // Vent T-cap
+            ctx.fillRect(vx - 12, surfaceY - 38, 24, 6);
+
+            // Rising Methane Gas Bubbles
+            for (let i = 0; i < 3; i++) {
+              const bubbleY = surfaceY - 45 - ((this.time * 40 + i * 25) % 65);
+              const bubbleSize = 3 + i * 1.5;
+              ctx.fillStyle = 'rgba(234, 179, 8, 0.75)';
+              ctx.beginPath();
+              ctx.arc(vx + Math.sin(this.time * 4 + i) * 6, bubbleY, bubbleSize, 0, Math.PI * 2);
+              ctx.fill();
+            }
+          });
+
+        } else if (modeId === 'sim_ch2_incinerator') {
+          // Factory Base Structure
+          ctx.fillStyle = '#1e293b';
+          ctx.fillRect(0, 0, w, h);
+
+          // Garbage Truck Unloading on Left
+          const truckX = w * 0.12;
+          const plantFloor = h * 0.78;
+          ctx.font = '36px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText('🚛', truckX, plantFloor - 10);
+          ctx.fillStyle = '#64748b';
+          ctx.fillRect(0, plantFloor, w, h - plantFloor);
+
+          // 1. High Heat Furnace Chamber
+          const furnaceX = w * 0.32;
+          const furnaceW = w * 0.22;
+          ctx.fillStyle = '#334155';
+          ctx.fillRect(furnaceX, h * 0.35, furnaceW, plantFloor - h * 0.35);
+
+          // Animated Roaring Furnace Fire
+          for (let f = 0; f < 5; f++) {
+            const flameH = 30 + Math.sin(this.time * 8 + f) * 12;
+            ctx.fillStyle = f % 2 === 0 ? '#ea580c' : '#facc15';
+            ctx.beginPath();
+            ctx.moveTo(furnaceX + 15 + f * 18, plantFloor);
+            ctx.lineTo(furnaceX + 24 + f * 18, plantFloor - flameH);
+            ctx.lineTo(furnaceX + 33 + f * 18, plantFloor);
+            ctx.closePath();
+            ctx.fill();
+          }
+
+          // Ash hopper under furnace
+          ctx.fillStyle = '#52525b';
+          ctx.beginPath();
+          ctx.moveTo(furnaceX + 10, plantFloor);
+          ctx.lineTo(furnaceX + furnaceW * 0.5, plantFloor + 25);
+          ctx.lineTo(furnaceX + furnaceW - 10, plantFloor);
+          ctx.closePath();
+          ctx.fill();
+
+          // Boiler Steam Pipe spinning turbine
+          ctx.strokeStyle = '#38bdf8';
+          ctx.lineWidth = 6;
+          ctx.beginPath();
+          ctx.moveTo(furnaceX + furnaceW * 0.5, h * 0.35);
+          ctx.lineTo(furnaceX + furnaceW * 0.5, h * 0.2);
+          ctx.lineTo(w * 0.58, h * 0.2);
+          ctx.stroke();
+
+          // Small spinning generator
+          ctx.fillStyle = '#10b981';
+          ctx.fillRect(w * 0.58 - 12, h * 0.15, 24, 24);
+
+          // 2. Scrubber Tower
+          const scrubX = w * 0.68;
+          const scrubW = w * 0.22;
+          ctx.fillStyle = '#1e293b';
+          ctx.strokeStyle = '#475569';
+          ctx.lineWidth = 4;
+          ctx.fillRect(scrubX, h * 0.28, scrubW, plantFloor - h * 0.28);
+          ctx.strokeRect(scrubX, h * 0.28, scrubW, plantFloor - h * 0.28);
+
+          // Internal water spray nozzles washing smoke
+          ctx.fillStyle = '#38bdf8';
+          for (let s = 0; s < 3; s++) {
+            const sprayY = h * 0.42 + s * 30;
+            ctx.fillRect(scrubX + 8, sprayY, scrubW - 16, 4);
+            // Animated water mist particles
+            for (let d = 0; d < 6; d++) {
+              const dropY = sprayY + ((this.time * 50 + d * 15) % 24);
+              ctx.beginPath();
+              ctx.arc(scrubX + 16 + d * 18, dropY, 2, 0, Math.PI * 2);
+              ctx.fill();
+            }
+          }
+
+          // Tall Chimney discharging clean white steam
+          const chimX = scrubX + scrubW * 0.5;
+          ctx.fillStyle = '#64748b';
+          ctx.fillRect(chimX - 14, 30, 28, h * 0.28);
+
+          // Clean White Water Vapor Clouds
+          for (let p of this.particles) {
+            p.y -= 2;
+            p.x += Math.sin(this.time + p.y * 0.04) * 1.5;
+            if (p.y < 5) { p.y = 30; p.x = chimX + (Math.random() - 0.5) * 10; }
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.65)';
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.size * 2.5, 0, Math.PI * 2);
+            ctx.fill();
+          }
+
+        } else if (modeId === 'sim_ch2_acidrain') {
+          // Atmospheric Sky & Ground
+          ctx.fillStyle = '#0f172a';
+          ctx.fillRect(0, 0, w, h);
+
+          // Dark Acidic Storm Clouds at Top
+          ctx.fillStyle = '#334155';
+          for (let c = 0; c < 7; c++) {
+            ctx.beginPath();
+            ctx.arc(40 + c * (w / 6), 40 + Math.sin(this.time * 2 + c) * 6, 45, 0, Math.PI * 2);
+            ctx.fill();
+          }
+
+          // Factory & Cars releasing exhaust into clouds
+          const groundY = h * 0.82;
+          ctx.fillStyle = '#1e293b';
+          ctx.fillRect(0, groundY, w, h - groundY);
+
+          // Factory on the left
+          ctx.fillStyle = '#475569';
+          ctx.fillRect(15, groundY - 60, 65, 60);
+          ctx.fillRect(25, groundY - 110, 18, 50); // Chimney
+          // Exhaust smoke drifting into clouds
+          ctx.fillStyle = 'rgba(234, 179, 8, 0.4)';
+          for (let i = 0; i < 5; i++) {
+            const smY = groundY - 110 - i * 18;
+            const smX = 34 + i * 14 + Math.sin(this.time * 3 + i) * 6;
+            ctx.beginPath();
+            ctx.arc(smX, smY, 10 + i * 3, 0, Math.PI * 2);
+            ctx.fill();
+          }
+
+          // Acid Rain Falling (Lime-green Tinted Acid Drops)
+          ctx.strokeStyle = 'rgba(163, 230, 53, 0.7)';
+          ctx.lineWidth = 2.5;
+          for (let p of this.particles) {
+            p.y += 5;
+            p.x -= 1.5;
+            if (p.y > groundY) { p.y = 80; p.x = Math.random() * w; }
+            ctx.beginPath();
+            ctx.moveTo(p.x, p.y);
+            ctx.lineTo(p.x - 4, p.y + 12);
+            ctx.stroke();
+          }
+
+          // Statue of Liberty / Marble Monument on the Right
+          const statueX = w * 0.72;
+          const statueBaseY = groundY - 10;
+
+          // Pedestal
+          ctx.fillStyle = '#64748b';
+          ctx.fillRect(statueX - 35, statueBaseY - 35, 70, 35);
+
+          // Weathered Statue of Liberty Head & Torch
+          ctx.font = '56px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText('🗽', statueX, statueBaseY - 35);
+
+          // Acid Fizzing Bubbles on Statue Surface
+          for (let b = 0; b < 6; b++) {
+            const fbX = statueX - 25 + b * 10 + Math.sin(this.time * 6 + b) * 4;
+            const fbY = statueBaseY - 60 + (b % 3) * 15;
+            ctx.fillStyle = 'rgba(190, 242, 100, 0.9)';
+            ctx.beginPath();
+            ctx.arc(fbX, fbY, 3, 0, Math.PI * 2);
+            ctx.fill();
+          }
+
+          // Dying Tree affected by acid soil
+          const treeX = w * 0.44;
+          ctx.fillStyle = '#78350f';
+          ctx.fillRect(treeX - 5, groundY - 50, 10, 50); // Bare trunk
+          ctx.font = '28px sans-serif';
+          ctx.fillText('🍂', treeX - 10, groundY - 45); // Dropping dead leaves
+          ctx.fillText('🍂', treeX + 15, groundY - 30);
+
+        } else if (modeId === 'sim_ch2_water') {
+          // Sky & Horizon
+          ctx.fillStyle = '#0f172a';
+          ctx.fillRect(0, 0, w, h * 0.35);
+
+          // River / Ocean Water Body
+          const waterY = h * 0.35;
+          const waterGrad = ctx.createLinearGradient(0, waterY, 0, h);
+          waterGrad.addColorStop(0, '#0369a1');
+          waterGrad.addColorStop(1, '#082f49');
+          ctx.fillStyle = waterGrad;
+          ctx.fillRect(0, waterY, w, h - waterY);
+
+          // Water surface waves
+          ctx.strokeStyle = 'rgba(56, 189, 248, 0.3)';
+          ctx.lineWidth = 2;
+          for (let wave = 0; wave < 3; wave++) {
+            ctx.beginPath();
+            const wy = waterY + 20 + wave * 35;
+            for (let x = 0; x < w; x += 15) {
+              const yOffset = Math.sin(x * 0.03 + this.time * 3 + wave) * 4;
+              if (x === 0) ctx.moveTo(x, wy + yOffset);
+              else ctx.lineTo(x, wy + yOffset);
+            }
+            ctx.stroke();
+          }
+
+          // Left: Leaking Sewer Pipe & Dark Oil Slick
+          const pipeY = waterY + 15;
+          ctx.fillStyle = '#475569';
+          ctx.fillRect(0, pipeY - 20, 50, 40);
+          // Dark sludge oozing into water
+          ctx.fillStyle = '#172554';
+          ctx.beginPath();
+          ctx.ellipse(80, waterY + 25, 60, 20, 0, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.font = '24px sans-serif';
+          ctx.fillText('🛢️', 45, waterY + 45);
+
+          // Yellow Floating Containment Booms
+          const boomX = w * 0.36;
+          ctx.strokeStyle = '#eab308';
+          ctx.lineWidth = 6;
+          ctx.beginPath();
+          for (let by = waterY + 5; by < h - 20; by += 15) {
+            const bx = boomX + Math.sin(by * 0.05 + this.time * 3) * 6;
+            if (by === waterY + 5) ctx.moveTo(bx, by);
+            else ctx.lineTo(bx, by);
+          }
+          ctx.stroke();
+
+          // Yellow Buoy floats along boom
+          for (let by = waterY + 10; by < h - 20; by += 30) {
+            ctx.fillStyle = '#fde047';
+            ctx.beginPath();
+            ctx.arc(boomX + Math.sin(by * 0.05 + this.time * 3) * 6, by, 5, 0, Math.PI * 2);
+            ctx.fill();
+          }
+
+          // Eco-cleanup Skimmer Boat in the Middle
+          const boatX = w * 0.58 + Math.sin(this.time * 1.5) * 15;
+          const boatY = waterY + 18;
+          ctx.font = '42px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText('🚢', boatX, boatY + 10);
+
+          // Right: Crystal Clear Protected Waters with Happy Marine Life
+          const fishX = w * 0.78 + Math.sin(this.time * 3) * 25;
+          const fishY = waterY + 65 + Math.cos(this.time * 2) * 15;
+          ctx.font = '28px sans-serif';
+          ctx.fillText('🐬', fishX, fishY);
+          ctx.fillText('🐟', fishX + 45, fishY + 30);
+          ctx.fillText('🪸', w * 0.9, h - 15);
+
+        } else if (modeId === 'sim_ch3_recycle') {
+          // Industrial Workshop Backdrop
+          ctx.fillStyle = '#0f172a';
+          ctx.fillRect(0, 0, w, h);
+
+          // Rotating Gears at Top
+          ctx.fillStyle = '#334155';
+          const gearX = w * 0.5;
+          ctx.save();
+          ctx.translate(gearX, 40);
+          ctx.rotate(this.time * 2);
+          ctx.font = '36px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText('⚙️', 0, 12);
+          ctx.restore();
+
+          // Horizontal Conveyor Belt
+          const beltY = h * 0.42;
+          ctx.fillStyle = '#475569';
+          ctx.fillRect(20, beltY, w - 40, 16);
+          // Belt tread markers moving
+          ctx.fillStyle = '#1e293b';
+          const offset = (this.time * 80) % 25;
+          for (let tx = 25 - offset; tx < w - 25; tx += 25) {
+            if (tx > 20 && tx < w - 25) ctx.fillRect(tx, beltY + 2, 8, 12);
+          }
+
+          // Moving Recyclable items on conveyor
+          const items = [
+            { icon: '🍾', type: 'Glass', col: '#0284c7' },
+            { icon: '📰', type: 'Paper', col: '#16a34a' },
+            { icon: '🧴', type: 'Plastic', col: '#eab308' },
+            { icon: '🥫', type: 'Aluminum', col: '#dc2626' }
+          ];
+
+          items.forEach((it, idx) => {
+            const itX = (w * 0.15 + (idx * 130) + this.time * 60) % (w - 100);
+            ctx.font = '28px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText(it.icon, itX, beltY - 6);
+          });
+
+          // 4 Colored Sorting Bins at Bottom
+          const binW = (w - 70) / 4;
+          const binY = h * 0.62;
+          const binH = h - binY - 15;
+
+          items.forEach((it, idx) => {
+            const bx = 25 + idx * (binW + 6);
+            ctx.fillStyle = it.col;
+            ctx.beginPath();
+            ctx.roundRect(bx, binY, binW, binH, [12, 12, 0, 0]);
+            ctx.fill();
+
+            // Bin symbol
+            ctx.fillStyle = '#ffffff';
+            ctx.font = '20px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('♻️', bx + binW * 0.5, binY + binH * 0.55);
+          });
+
+        } else if (modeId === 'sim_ch3_compost') {
+          ctx.fillStyle = '#0f172a';
+          ctx.fillRect(0, 0, w, h);
+
+          // Wooden Compost Bin Outer Frame
+          const binX = w * 0.22;
+          const binW = w * 0.56;
+          const binY = 50;
+          const binH = h - 65;
+
+          // Slatted Wooden Frame
+          ctx.fillStyle = '#78350f';
+          for (let s = 0; s < 7; s++) {
+            ctx.fillRect(binX - 10, binY + s * 34, binW + 20, 22);
+          }
+
+          // Interior Layers
+          const layerH = (binH - 20) / 3;
+
+          // Layer 1 (Bottom): Twigs and dry leaves (Browns)
+          ctx.fillStyle = '#451a03';
+          ctx.fillRect(binX, binY + layerH * 2, binW, layerH);
+          ctx.font = '16px sans-serif';
+          ctx.fillText('🍂 🪵 🍂 🪵 🍂', binX + binW * 0.5, binY + layerH * 2.6);
+
+          // Layer 2 (Middle): Food scraps (Greens: Apple, Banana, Peels)
+          ctx.fillStyle = '#713f12';
+          ctx.fillRect(binX, binY + layerH, binW, layerH);
+          ctx.fillText('🍎 🍌 ☕ 🥚 🥦', binX + binW * 0.5, binY + layerH * 1.6);
+
+          // Layer 3 (Top): Rich decomposing dark humus soil
+          ctx.fillStyle = '#171717';
+          ctx.fillRect(binX, binY + 10, binW, layerH - 10);
+
+          // Animated Earthworms wiggling in soil
+          for (let wIdx = 0; wIdx < 3; wIdx++) {
+            const wormX = binX + 40 + wIdx * 90;
+            const wormY = binY + layerH * 1.2 + Math.sin(this.time * 4 + wIdx) * 6;
+            ctx.strokeStyle = '#f472b6';
+            ctx.lineWidth = 4;
+            ctx.lineCap = 'round';
+            ctx.beginPath();
+            ctx.moveTo(wormX - 12, wormY);
+            ctx.quadraticCurveTo(wormX, wormY - 6, wormX + 12, wormY);
+            ctx.stroke();
+          }
+
+          // Rising Microbial Heat Steam (130-150°F)
+          for (let s = 0; s < 4; s++) {
+            const stX = binX + 50 + s * 60;
+            const stY = binY - ((this.time * 30 + s * 20) % 40);
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+            ctx.beginPath();
+            ctx.arc(stX + Math.sin(this.time * 3 + s) * 5, stY, 5, 0, Math.PI * 2);
+            ctx.fill();
+          }
+
+          // Flourishing sunflower growing out of top soil!
+          const flowerX = binX + binW * 0.5;
+          ctx.font = '36px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText('🌻', flowerX, binY + 5);
+
+        } else if (modeId === 'sim_ch3_habitat') {
+          // Lush Mountain Sunset Sky
+          const skyGrad = ctx.createLinearGradient(0, 0, 0, h);
+          skyGrad.addColorStop(0, '#0c4a6e');
+          skyGrad.addColorStop(0.5, '#0369a1');
+          skyGrad.addColorStop(1, '#064e3b');
+          ctx.fillStyle = skyGrad;
+          ctx.fillRect(0, 0, w, h);
+
+          // Snow-capped Yellowstone Mountain Peaks in background
+          ctx.fillStyle = '#64748b';
+          ctx.beginPath();
+          ctx.moveTo(w * 0.1, h * 0.6);
+          ctx.lineTo(w * 0.35, h * 0.18);
+          ctx.lineTo(w * 0.6, h * 0.6);
+          ctx.closePath();
+          ctx.fill();
+          // Snow tip
+          ctx.fillStyle = '#f8fafc';
+          ctx.beginPath();
+          ctx.moveTo(w * 0.3, h * 0.28);
+          ctx.lineTo(w * 0.35, h * 0.18);
+          ctx.lineTo(w * 0.4, h * 0.28);
+          ctx.closePath();
+          ctx.fill();
+
+          // Green Forest Hills
+          ctx.fillStyle = '#065f46';
+          ctx.beginPath();
+          ctx.arc(w * 0.2, h + 80, w * 0.4, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = '#047857';
+          ctx.beginPath();
+          ctx.arc(w * 0.8, h + 90, w * 0.5, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Flowing Restored River (Dam Removed!)
+          ctx.fillStyle = '#38bdf8';
+          ctx.beginPath();
+          ctx.moveTo(w * 0.45, h * 0.52);
+          ctx.lineTo(w * 0.62, h);
+          ctx.lineTo(w * 0.32, h);
+          ctx.closePath();
+          ctx.fill();
+
+          // Leaping Wild Salmon Fish 🐟
+          const salmonY = h * 0.72 + Math.sin(this.time * 4) * 14;
+          ctx.font = '22px sans-serif';
+          ctx.fillText('🐟', w * 0.48, salmonY);
+
+          // Replanted Healthy Pine Trees 🌲
+          for (let tx = 30; tx < w * 0.4; tx += 45) {
+            ctx.font = '28px sans-serif';
+            ctx.fillText('🌲', tx, h * 0.68);
+          }
+
+          // Protected Gray Wolf Pack 🐺
+          const wolfX = w * 0.75 + Math.sin(this.time) * 12;
+          ctx.font = '36px sans-serif';
+          ctx.fillText('🐺', wolfX, h * 0.78);
+          ctx.font = '22px sans-serif';
+          ctx.fillText('🐾', wolfX + 28, h * 0.82);
+
+        } else if (modeId === 'sim_ch3_condor') {
+          // Grand Canyon Red Rock Gorge
+          ctx.fillStyle = '#0f172a';
+          ctx.fillRect(0, 0, w, h);
+
+          // Canyon Cliffs
+          ctx.fillStyle = '#9a3412';
+          ctx.beginPath();
+          ctx.moveTo(0, h * 0.4);
+          ctx.lineTo(w * 0.28, h * 0.5);
+          ctx.lineTo(w * 0.35, h);
+          ctx.lineTo(0, h);
+          ctx.closePath();
+          ctx.fill();
+
+          ctx.fillStyle = '#c2410c';
+          ctx.beginPath();
+          ctx.moveTo(w, h * 0.35);
+          ctx.lineTo(w * 0.72, h * 0.52);
+          ctx.lineTo(w * 0.65, h);
+          ctx.lineTo(w, h);
+          ctx.closePath();
+          ctx.fill();
+
+          // Cliff Ledge Nest with Condor Chick
+          const nestX = w * 0.16;
+          const nestY = h * 0.44;
+          ctx.font = '26px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText('🪹', nestX, nestY);
+          ctx.font = '18px sans-serif';
+          ctx.fillText('🐣', nestX, nestY - 6);
+
+          // Giant Soaring California Condor (9.5 ft Wingspan!)
+          const condorX = w * 0.5 + Math.cos(this.time * 1.8) * (w * 0.25);
+          const condorY = h * 0.32 + Math.sin(this.time * 2.5) * 25;
+          const wingFlap = Math.sin(this.time * 5) * 8;
+
+          ctx.save();
+          ctx.translate(condorX, condorY);
+          // Giant black wings with white wing-triangle patches
+          ctx.fillStyle = '#09090b';
+          // Left wing
+          ctx.beginPath();
+          ctx.moveTo(0, 0);
+          ctx.quadraticCurveTo(-45, -35 + wingFlap, -80, -10 + wingFlap);
+          ctx.lineTo(-40, 15);
+          ctx.closePath();
+          ctx.fill();
+          // Right wing
+          ctx.beginPath();
+          ctx.moveTo(0, 0);
+          ctx.quadraticCurveTo(45, -35 + wingFlap, 80, -10 + wingFlap);
+          ctx.lineTo(40, 15);
+          ctx.closePath();
+          ctx.fill();
+
+          // White triangular underwing patches
+          ctx.fillStyle = '#f8fafc';
+          ctx.beginPath();
+          ctx.moveTo(-15, 0);
+          ctx.lineTo(-45, -15 + wingFlap);
+          ctx.lineTo(-30, 8);
+          ctx.closePath();
+          ctx.fill();
+          ctx.beginPath();
+          ctx.moveTo(15, 0);
+          ctx.lineTo(45, -15 + wingFlap);
+          ctx.lineTo(30, 8);
+          ctx.closePath();
+          ctx.fill();
+
+          // Condor Orange Head & Beak
+          ctx.fillStyle = '#ea580c';
+          ctx.beginPath();
+          ctx.arc(0, -6, 9, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = '#fde047';
+          ctx.beginPath();
+          ctx.moveTo(0, -12);
+          ctx.lineTo(4, -18);
+          ctx.lineTo(-4, -18);
+          ctx.closePath();
+          ctx.fill();
+
+          // Satellite tracking wing-tag #22
+          ctx.fillStyle = '#38bdf8';
+          ctx.fillRect(-22, -2, 8, 8);
+          ctx.restore();
+
+        } else {
+          ctx.font = '54px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText(this.currentMode ? this.currentMode.icon : '⚡', w / 2, h / 2);
+          for (let p of this.particles) {
+            p.x += p.vx;
+            p.y += p.vy;
+            if (p.x < 0 || p.x > w) p.vx *= -1;
+            if (p.y > h) p.y = 0;
+            ctx.fillStyle = p.color;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        }
+      }
+    }
+    const simManager = new SimulationManager();
+
+    class ConceptManager {
+      constructor() {
+        this.modal = document.getElementById('conceptModal');
+        this.titleEl = document.getElementById('conceptModalTitle');
+        this.descEl = document.getElementById('conceptModalDescription');
+        this.canvas = document.getElementById('conceptMiniCanvas');
+        this.ctx = this.canvas ? this.canvas.getContext('2d') : null;
+        this.animId = null;
+        this.time = 0;
+        this.currentConcept = null;
+      }
+
+      open(concept) {
+        sfx.click();
+        this.currentConcept = concept;
+        if (this.titleEl) this.titleEl.textContent = concept.title;
+        if (this.descEl) this.descEl.textContent = concept.detail || concept.summary;
+        if (this.modal) this.modal.classList.remove('hidden');
+
+        audioManager.speak(`${concept.title}. ${concept.detail || concept.summary}`);
+        this.startMiniCanvas();
+      }
+
+      closeModal() {
+        sfx.click();
+        if (this.modal) this.modal.classList.add('hidden');
+        if (this.animId) {
+          cancelAnimationFrame(this.animId);
+          this.animId = null;
+        }
+      }
+
+      startMiniCanvas() {
+        if (!this.canvas || !this.ctx) return;
+        this.canvas.width = this.canvas.clientWidth || 320;
+        this.canvas.height = this.canvas.clientHeight || 180;
+        if (this.animId) cancelAnimationFrame(this.animId);
+
+        const render = () => {
+          if (this.modal && this.modal.classList.contains('hidden')) return;
+          this.time += 0.04;
+          const ctx = this.ctx;
+          const w = this.canvas.width;
+          const h = this.canvas.height;
+          ctx.clearRect(0, 0, w, h);
+
+          // Deep educational backdrop
+          const bgGrad = ctx.createLinearGradient(0, 0, 0, h);
+          bgGrad.addColorStop(0, '#0f172a');
+          bgGrad.addColorStop(1, '#1e293b');
+          ctx.fillStyle = bgGrad;
+          ctx.fillRect(0, 0, w, h);
+
+          const cid = this.currentConcept ? this.currentConcept.id : '';
+
+          if (cid === 'c_renewable') {
+            // Left: Glowing Smiling Sun with rotating corona
+            const sunX = w * 0.22;
+            const sunY = h * 0.42;
+            ctx.save();
+            ctx.translate(sunX, sunY);
+            ctx.rotate(this.time * 0.6);
+            ctx.strokeStyle = '#facc15';
+            ctx.lineWidth = 3;
+            for (let a = 0; a < Math.PI * 2; a += Math.PI / 4) {
+              ctx.beginPath();
+              ctx.moveTo(Math.cos(a) * 24, Math.sin(a) * 24);
+              ctx.lineTo(Math.cos(a) * 36, Math.sin(a) * 36);
+              ctx.stroke();
+            }
+            ctx.restore();
+            // Sun Core
+            ctx.beginPath();
+            ctx.arc(sunX, sunY, 20, 0, Math.PI * 2);
+            ctx.fillStyle = '#f59e0b';
+            ctx.fill();
+            ctx.font = '16px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('😊', sunX, sunY);
+
+            // Right: Growing Sprouting Tree
+            const treeX = w * 0.78;
+            const treeY = h * 0.75;
+            // Tree trunk
+            ctx.fillStyle = '#78350f';
+            ctx.fillRect(treeX - 6, treeY - 35, 12, 35);
+            // Foliage cycling in size
+            const foliageScale = (Math.sin(this.time * 2.5) + 1) * 3 + 22;
+            ctx.beginPath();
+            ctx.arc(treeX, treeY - 45, foliageScale, 0, Math.PI * 2);
+            ctx.fillStyle = '#10b981';
+            ctx.fill();
+            ctx.font = '18px sans-serif';
+            ctx.fillText('🍎', treeX + 6, treeY - 48);
+
+            // Center: Infinite Green Regeneration Arrow Symbol
+            ctx.save();
+            ctx.translate(w * 0.5, h * 0.42);
+            ctx.rotate(this.time * 1.5);
+            ctx.font = 'bold 36px sans-serif';
+            ctx.fillStyle = '#34d399';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('🔄', 0, 0);
+            ctx.restore();
+
+          } else if (cid === 'c_nonrenewable') {
+            // Left half: Cross-section of deep Earth strata
+            const splitX = w * 0.6;
+            // Top layer (Soil)
+            ctx.fillStyle = '#15803d';
+            ctx.fillRect(10, 20, splitX - 20, 16);
+            ctx.fillStyle = '#78350f';
+            ctx.fillRect(10, 36, splitX - 20, 28);
+            // Middle rock layer with fossils
+            ctx.fillStyle = '#57534e';
+            ctx.fillRect(10, 64, splitX - 20, 42);
+            ctx.font = '22px sans-serif';
+            ctx.fillText('🦖', splitX * 0.45, 92);
+
+            // Bottom dark layer (Trapped Oil & Coal)
+            ctx.fillStyle = '#171717';
+            ctx.fillRect(10, 106, splitX - 20, 36);
+            ctx.font = '20px sans-serif';
+            ctx.fillText('🛢️', splitX * 0.48, 132);
+
+            // Right half: Fuel Level Gauge for Kids
+            const gaugeX = w * 0.8;
+            const gaugeY = h * 0.5;
+            ctx.beginPath();
+            ctx.arc(gaugeX, gaugeY, 32, Math.PI, 0);
+            ctx.fillStyle = '#334155';
+            ctx.fill();
+            ctx.lineWidth = 4;
+            ctx.strokeStyle = '#f43f5e';
+            ctx.stroke();
+
+            // Depleting Needle moving back and forth
+            const needleAngle = Math.PI + (Math.sin(this.time * 2) * 0.5 + 0.5) * Math.PI;
+            ctx.beginPath();
+            ctx.moveTo(gaugeX, gaugeY);
+            ctx.lineTo(gaugeX + Math.cos(needleAngle) * 26, gaugeY + Math.sin(needleAngle) * 26);
+            ctx.strokeStyle = '#facc15';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+
+          } else if (cid === 'c_materials') {
+            // 3 Clear Transformation Columns: Ore -> Product
+            const col1 = w * 0.2;
+            const col2 = w * 0.5;
+            const col3 = w * 0.8;
+
+            // 1. Rock to Monument
+            ctx.font = '26px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('🪨', col1, 45);
+            ctx.font = 'bold 16px sans-serif';
+            ctx.fillStyle = '#cbd5e1';
+            ctx.fillText('➔', col1, 80);
+            ctx.font = '28px sans-serif';
+            ctx.fillText('🏛️', col1, 125);
+
+            // 2. Copper Mineral to Electrical Wires
+            ctx.font = '26px sans-serif';
+            ctx.fillText('⛏️', col2, 45);
+            ctx.font = 'bold 16px sans-serif';
+            ctx.fillStyle = '#facc15';
+            ctx.fillText('➔', col2, 80);
+            // Glowing wire and bulb
+            ctx.font = '28px sans-serif';
+            ctx.fillText('💡', col2, 125);
+
+            // 3. Soil/Water to Crops
+            ctx.font = '26px sans-serif';
+            ctx.fillText('🌱', col3, 45);
+            ctx.font = 'bold 16px sans-serif';
+            ctx.fillStyle = '#34d399';
+            ctx.fillText('➔', col3, 80);
+            ctx.font = '28px sans-serif';
+            ctx.fillText('🥗', col3, 125);
+
+          } else if (cid === 'c_landfill') {
+            // Sanitary Landfill Cross Section Mini Animation
+            ctx.fillStyle = '#78350f';
+            ctx.fillRect(15, h - 25, w - 30, 20); // Base Clay
+            ctx.fillStyle = '#020617';
+            ctx.fillRect(15, h - 30, w - 30, 5); // Impervious Plastic Liner
+
+            // Compacted trash layers
+            ctx.fillStyle = '#52525b';
+            ctx.fillRect(20, h - 75, w - 40, 45);
+            ctx.font = '16px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('📦 🥫 🧴 📰 🚜', w * 0.5, h - 48);
+
+            // Soil cover on top
+            ctx.fillStyle = '#16a34a';
+            ctx.fillRect(15, h - 90, w - 30, 15);
+            ctx.font = '18px sans-serif';
+            ctx.fillText('🌲 🌳 🌲', w * 0.5, h - 98);
+
+            // Methane Vent Pipe
+            ctx.fillStyle = '#94a3b8';
+            ctx.fillRect(w * 0.8, 25, 8, h - 55);
+
+          } else if (cid === 'c_acidrain') {
+            // Acid rain cloud and dissolving monument
+            ctx.fillStyle = '#475569';
+            ctx.beginPath();
+            ctx.arc(w * 0.35, 35, 30, 0, Math.PI * 2);
+            ctx.arc(w * 0.5, 30, 35, 0, Math.PI * 2);
+            ctx.arc(w * 0.65, 35, 30, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Acid rain drops
+            ctx.strokeStyle = '#a3e635';
+            ctx.lineWidth = 2;
+            for (let r = 0; r < 8; r++) {
+              const rx = w * 0.3 + r * 15;
+              const ry = 60 + ((this.time * 60 + r * 20) % 55);
+              ctx.beginPath();
+              ctx.moveTo(rx, ry);
+              ctx.lineTo(rx - 2, ry + 10);
+              ctx.stroke();
+            }
+
+            // Weathering Monument
+            ctx.font = '40px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('🏛️', w * 0.5, h - 25);
+
+          } else if (cid === 'c_scrubbers') {
+            // Smokestack with internal water scrubber
+            ctx.fillStyle = '#334155';
+            ctx.fillRect(w * 0.4 - 25, 45, 50, h - 70);
+
+            // Water spray mist inside scrubber
+            ctx.fillStyle = '#38bdf8';
+            for (let m = 0; m < 5; m++) {
+              const my = 65 + m * 15;
+              ctx.fillRect(w * 0.4 - 20, my, 40, 2);
+            }
+
+            // Trapped particles at bottom
+            ctx.fillStyle = '#0f172a';
+            ctx.fillRect(w * 0.4 - 20, h - 35, 40, 10);
+
+            // Clean white steam emerging at top
+            ctx.font = '28px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('☁️', w * 0.4, 30);
+
+          } else if (cid === 'c_3rs') {
+            // Rotating 3 R's Tri-circle
+            ctx.save();
+            ctx.translate(w * 0.5, h * 0.42);
+            ctx.rotate(this.time * 1.5);
+            ctx.font = '46px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('♻️', 0, 0);
+            ctx.restore();
+
+            // 3 Clean Graphic Badges
+            ctx.font = '24px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('🛍️', w * 0.2, h - 18);
+            ctx.fillText('🫙', w * 0.5, h - 18);
+            ctx.fillText('🥫', w * 0.8, h - 18);
+
+          } else if (cid === 'c_compost') {
+            // Layered compost pile with apple, leaves, worms, and sunflower
+            ctx.fillStyle = '#451a03';
+            ctx.fillRect(w * 0.2, h - 45, w * 0.6, 20); // Browns
+            ctx.fillStyle = '#713f12';
+            ctx.fillRect(w * 0.2, h - 75, w * 0.6, 30); // Greens (food scraps)
+            ctx.font = '16px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('🍂 🍎 🍌 🪱 🍂', w * 0.5, h - 55);
+
+            // Sunflower on top
+            ctx.font = '32px sans-serif';
+            ctx.fillText('🌻', w * 0.5, h - 90);
+
+          } else if (cid === 'c_wildlife') {
+            // Condor flying over wildlife sanctuary shield
+            ctx.font = '38px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('🦅', w * 0.5 + Math.sin(this.time * 2) * 20, 50);
+            ctx.font = '28px sans-serif';
+            ctx.fillText('🐺 🌲 🛡️ 🌲 🐻', w * 0.5, h - 35);
+
+          } else {
+            ctx.save();
+            ctx.translate(w / 2, h / 2);
+            ctx.font = '48px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(this.currentConcept ? this.currentConcept.icon : '🌱', 0, Math.sin(this.time * 3) * 10);
+            ctx.restore();
+          }
+
+          this.animId = requestAnimationFrame(render);
+        };
+        render();
+      }
+    }
+    const conceptManager = new ConceptManager();
+
+    class GlossaryController {
+      constructor() {
+        this.checkedTerms = new Set();
+        this.termsList = [];
+      }
+
+      render(terms, remedyHighlightSet = new Set()) {
+        this.termsList = terms;
+        this.checkedTerms.clear();
+        const container = document.getElementById('glossaryGrid');
+        const counterEl = document.getElementById('glossaryCounter');
+        const totalEl = document.getElementById('glossaryTotal');
+        if (!container) return;
+
+        container.innerHTML = '';
+        if (counterEl) counterEl.textContent = '0';
+        if (totalEl) totalEl.textContent = terms.length;
+
+        terms.forEach(item => {
+          const isFailed = remedyHighlightSet && remedyHighlightSet.has(item.id);
+          const card = document.createElement('div');
+          card.id = `glossary_${item.id}`;
+          card.className = `cursor-pointer p-4 rounded-2xl border-4 transition-all duration-200 transform active:scale-95 shadow-sm hover:shadow-md flex items-start justify-between gap-3 ${
+            isFailed 
+              ? 'remedy-highlight' 
+              : 'border-indigo-100 hover:border-indigo-300 bg-indigo-50/40'
+          }`;
+
+          card.innerHTML = `
+            <div class="space-y-1 flex-1">
+              ${isFailed ? '<div class="text-[10px] font-black uppercase text-amber-800 tracking-wider flex items-center gap-1 mb-1"><span>⚠️</span><span>Pay more attention to this part!</span></div>' : ''}
+              <div class="flex items-center gap-2">
+                <span class="text-lg text-indigo-600"><i class="fa-solid fa-volume-high"></i></span>
+                <h4 class="font-black text-slate-800 text-base">${item.term}</h4>
+              </div>
+              <p class="text-xs text-slate-600 font-semibold leading-relaxed border-t border-indigo-100/80 pt-1.5 mt-1">${item.definition}</p>
+            </div>
+            <div class="check-box w-7 h-7 rounded-xl border-2 border-indigo-200 bg-white flex items-center justify-center text-emerald-600 text-sm font-black flex-shrink-0 transition-transform">
+              <i class="fa-solid fa-check opacity-0 transition-opacity"></i>
+            </div>
+          `;
+
+          card.onclick = () => this.handleCardClick(item, card);
+          container.appendChild(card);
+        });
+      }
+
+      handleCardClick(item, card) {
+        sfx.click();
+        audioManager.speak(`${item.term}. ${item.definition}`);
+
+        const checkIcon = card.querySelector('.check-box i');
+        const checkBox = card.querySelector('.check-box');
+        if (checkIcon) {
+          checkIcon.classList.remove('opacity-0');
+          checkIcon.classList.add('opacity-100');
+        }
+        if (checkBox) {
+          checkBox.classList.add('bg-emerald-100', 'border-emerald-400', 'scale-110');
+        }
+
+        if (!this.checkedTerms.has(item.id)) {
+          this.checkedTerms.add(item.id);
+          sfx.correct();
+          app.addCandies(1);
+          const counterEl = document.getElementById('glossaryCounter');
+          if (counterEl) counterEl.textContent = this.checkedTerms.size;
+
+          if (this.checkedTerms.size === this.termsList.length) {
+            setTimeout(() => {
+              sfx.winFanfare();
+              audioManager.speak("Awesome job! You mastered all terms. Let's start the Chapter Quiz!");
+              setTimeout(() => {
+                app.startQuiz();
+              }, 1400);
+            }, 800);
+          }
+        }
+      }
+    }
+    const glossaryManager = new GlossaryController();
+
+    class QuizController {
+      constructor() {
+        this.questions = [];
+        this.currentIndex = 0;
+        this.score = 0;
+        this.hearts = 5;
+        this.answered = false;
+        this.failedConcepts = new Set();
+        this.failedTerms = new Set();
+      }
+
+      init(questions) {
+        this.questions = questions;
+        this.currentIndex = 0;
+        this.score = 0;
+        this.answered = false;
+        this.failedConcepts.clear();
+        this.failedTerms.clear();
+        this.updateHeartsUI();
+        this.renderQuestion();
+      }
+
+      updateHeartsUI() {
+        const container = document.getElementById('quizHeartsContainer');
+        if (!container) return;
+        container.innerHTML = '';
+        for (let i = 0; i < 5; i++) {
+          const heart = document.createElement('i');
+          heart.className = i < this.hearts ? "fa-solid fa-heart text-rose-500" : "fa-regular fa-heart text-slate-300";
+          container.appendChild(heart);
+        }
+      }
+
+      renderQuestion() {
+        this.answered = false;
+        const q = this.questions[this.currentIndex];
+        document.getElementById('quizQuestionNumber').textContent = `Question ${this.currentIndex + 1} of ${this.questions.length}`;
+        const pct = Math.round(((this.currentIndex) / this.questions.length) * 100);
+        document.getElementById('quizProgressPercent').textContent = `${pct}%`;
+        document.getElementById('quizProgressBar').style.width = `${pct}%`;
+        document.getElementById('quizQuestionText').textContent = q.question;
+
+        // Hide feedback box
+        document.getElementById('quizFeedbackBox').classList.add('hidden');
+
+        // Pronounce Question
+        audioManager.speak(q.question);
+
+        // Options
+        const container = document.getElementById('quizOptionsContainer');
+        container.innerHTML = '';
+
+        q.options.forEach((optText, optIdx) => {
+          const btn = document.createElement('button');
+          btn.className = "w-full text-left p-4 rounded-2xl border-4 border-slate-200 bg-white hover:border-indigo-400 font-extrabold text-sm text-slate-700 transition active:scale-98 flex items-center justify-between shadow-sm";
+          btn.innerHTML = `<span>${optText}</span><span class="w-6 h-6 rounded-full border-2 border-slate-300 flex items-center justify-center text-xs"></span>`;
+          btn.onclick = () => this.selectOption(optIdx, btn);
+          container.appendChild(btn);
+        });
+      }
+
+      selectOption(selectedIdx, btn) {
+        if (this.answered) return;
+        this.answered = true;
+
+        const q = this.questions[this.currentIndex];
+        const feedbackBox = document.getElementById('quizFeedbackBox');
+        const feedbackIcon = document.getElementById('quizFeedbackIcon');
+        const feedbackTitle = document.getElementById('quizFeedbackTitle');
+        const feedbackDesc = document.getElementById('quizFeedbackDesc');
+
+        feedbackBox.classList.remove('hidden');
+
+        if (selectedIdx === q.correct) {
+          // Correct!
+          sfx.correct();
+          app.addCandies(5);
+          this.score++;
+          btn.className = "w-full text-left p-4 rounded-2xl border-4 border-emerald-500 bg-emerald-50 font-black text-sm text-emerald-900 flex items-center justify-between shadow-md";
+          btn.querySelector('span:last-child').innerHTML = "✓";
+          btn.querySelector('span:last-child').className = "w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center text-xs";
+
+          feedbackBox.className = "p-4 rounded-2xl border-2 border-emerald-300 bg-emerald-50 font-bold text-sm flex items-center justify-between animate-fadeIn text-emerald-950";
+          feedbackIcon.textContent = "🎉";
+          feedbackTitle.textContent = "Correct! High Five!";
+          feedbackDesc.textContent = q.explanation;
+          audioManager.speak(`Correct! ${q.explanation}`);
+        } else {
+          // Wrong!
+          sfx.wrong();
+          this.hearts = Math.max(0, this.hearts - 1);
+          this.updateHeartsUI();
+          this.failedConcepts.add(q.conceptId);
+          this.failedTerms.add(q.termId);
+
+          btn.className = "w-full text-left p-4 rounded-2xl border-4 border-rose-500 bg-rose-50 font-black text-sm text-rose-900 flex items-center justify-between shadow-md";
+          btn.querySelector('span:last-child').innerHTML = "✗";
+          btn.querySelector('span:last-child').className = "w-6 h-6 rounded-full bg-rose-500 text-white flex items-center justify-center text-xs";
+
+          feedbackBox.className = "p-4 rounded-2xl border-2 border-rose-300 bg-rose-50 font-bold text-sm flex items-center justify-between animate-fadeIn text-rose-950";
+          feedbackIcon.textContent = "💡";
+          feedbackTitle.textContent = "Keep Going!";
+          feedbackDesc.textContent = q.explanation;
+          audioManager.speak(`Not quite. Remember: ${q.explanation}`);
+        }
+      }
+
+      nextQuestion() {
+        sfx.click();
+        this.currentIndex++;
+        if (this.currentIndex < this.questions.length && this.hearts > 0) {
+          this.renderQuestion();
+        } else {
+          this.finishQuiz();
+        }
+      }
+
+      finishQuiz() {
+        const percentage = Math.round((this.score / this.questions.length) * 100);
+        const scoreString = `${percentage}%`;
+
+        // Register to Google Sheets in background
+        saveResultsToExcel(app.studentName, scoreString);
+
+        if (percentage >= 80 && this.hearts > 0) {
+          // Success! Award diploma
+          sfx.winFanfare();
+          confetti({ particleCount: 120, spread: 80, origin: { y: 0.5 } });
+          app.updateChapterProgress(app.currentChapterId, percentage);
+          diplomaManager.show(app.currentChapterId, scoreString);
+        } else {
+          // Remediation needed (< 80%)
+          audioManager.speak("Pay more attention to these parts!");
+          remediationManager.show(percentage, this.failedConcepts, this.failedTerms);
+        }
+      }
+    }
+    const quizManager = new QuizController();
+
+    class RemediationManager {
+      constructor() {
+        this.missedConcepts = new Set();
+        this.missedTerms = new Set();
+      }
+
+      show(scorePct, failedConcepts, failedTerms) {
+        this.missedConcepts = failedConcepts;
+        this.missedTerms = failedTerms;
+
+        document.getElementById('remediationScoreText').textContent = `${scorePct}%`;
+        const listEl = document.getElementById('remediationMissedList');
+        listEl.innerHTML = '';
+
+        const ch = CHAPTERS_DATA[app.currentChapterId];
+        ch.glossary.filter(t => failedTerms.has(t.id)).forEach(t => {
+          const li = document.createElement('li');
+          li.className = "p-2 rounded-xl bg-amber-100 border border-amber-300 flex items-center gap-2";
+          li.innerHTML = `<span>⚠️</span><span><strong>${t.term}:</strong> ${t.definition}</span>`;
+          listEl.appendChild(li);
+        });
+
+        app.showScreen('remediation');
+      }
+    }
+    const remediationManager = new RemediationManager();
+
+    class DiplomaManager {
+      show(chId, scoreStr) {
+        const ch = CHAPTERS_DATA[chId];
+        document.getElementById('diplomaStudentName').textContent = app.studentName;
+        document.getElementById('diplomaChapterName').textContent = ch.title;
+        document.getElementById('diplomaFinalScore').textContent = scoreStr;
+        document.getElementById('diplomaDateText').textContent = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+        document.getElementById('diplomaAvatarPreview').textContent = shop.equippedAvatar;
+        app.showScreen('diploma');
+        audioManager.speak(`Congratulations ${app.studentName}! You achieved excellence with ${scoreStr} in ${ch.title}!`);
+      }
+
+      shareVictory() {
+        sfx.winFanfare();
+        confetti({ particleCount: 150, spread: 90 });
+        audioManager.speak("You are an official Earth Guardian Scientist!");
+      }
+    }
+    const diplomaManager = new DiplomaManager();
+
+    class ShopManager {
+      constructor() {
+        this.modal = document.getElementById('shopModal');
+        this.equippedAvatar = '🧑‍🔬';
+        this.items = [
+          { id: 'av_scientist', name: 'Lab Scientist', icon: '🧑‍🔬', cost: 0, owned: true },
+          { id: 'av_explorer', name: 'Eco Explorer', icon: '🤠', cost: 15, owned: false },
+          { id: 'av_astronaut', name: 'Space Probe Pilot', icon: '👨‍🚀', cost: 25, owned: false },
+          { id: 'av_ranger', name: 'Wildlife Ranger', icon: '🦁', cost: 35, owned: false },
+          { id: 'av_cyber', name: 'Cyber Hero', icon: '🤖', cost: 45, owned: false }
+        ];
+      }
+
+      openModal() {
+        sfx.click();
+        document.getElementById('shopCandyBalance').textContent = app.candies;
+        this.renderAvatars();
+        this.modal.classList.remove('hidden');
+      }
+
+      closeModal() {
+        sfx.click();
+        this.modal.classList.add('hidden');
+      }
+
+      renderAvatars() {
+        const grid = document.getElementById('shopAvatarsGrid');
+        if (!grid) return;
+        grid.innerHTML = '';
+
+        this.items.forEach(item => {
+          const card = document.createElement('div');
+          const isEquipped = this.equippedAvatar === item.icon;
+          card.className = `p-3 rounded-2xl border-2 flex flex-col items-center justify-between text-center gap-2 ${
+            isEquipped ? 'border-purple-500 bg-purple-50' : 'border-slate-200 bg-white'
+          }`;
+          card.innerHTML = `
+            <div class="text-4xl">${item.icon}</div>
+            <div>
+              <p class="font-extrabold text-xs text-slate-800">${item.name}</p>
+              <p class="text-[10px] text-slate-400 font-bold">${item.owned ? 'Unlocked' : `${item.cost} 🍬`}</p>
+            </div>
+            <button class="w-full text-xs font-black py-1.5 rounded-xl shadow-sm transition active:scale-95 ${
+              isEquipped 
+                ? 'bg-purple-600 text-white' 
+                : item.owned 
+                  ? 'bg-slate-200 text-slate-700 hover:bg-slate-300' 
+                  : 'bg-amber-400 text-amber-950 hover:bg-amber-300'
+            }">
+              ${isEquipped ? 'Equipped' : item.owned ? 'Equip' : 'Buy'}
+            </button>
+          `;
+
+          card.querySelector('button').onclick = () => this.handleItemAction(item);
+          grid.appendChild(card);
+        });
+      }
+
+      handleItemAction(item) {
+        if (item.owned) {
+          sfx.click();
+          this.equippedAvatar = item.icon;
+          this.updateAvatarUI();
+          this.renderAvatars();
+          audioManager.speak(`Equipped ${item.name}! Looking great!`);
+        } else {
+          if (app.candies >= item.cost) {
+            sfx.correct();
+            app.candies -= item.cost;
+            item.owned = true;
+            this.equippedAvatar = item.icon;
+            app.updateStatsUI();
+            this.updateAvatarUI();
+            this.renderAvatars();
+            document.getElementById('shopCandyBalance').textContent = app.candies;
+            audioManager.speak(`Congratulations! You unlocked ${item.name}!`);
+          } else {
+            sfx.wrong();
+            audioManager.speak("Not enough candies yet. Complete more quiz questions to earn candies!");
+          }
+        }
+      }
+
+      buyHeartRefill() {
+        if (app.candies >= 10) {
+          sfx.correct();
+          app.candies -= 10;
+          quizManager.hearts = 5;
+          quizManager.updateHeartsUI();
+          app.updateStatsUI();
+          document.getElementById('shopCandyBalance').textContent = app.candies;
+          audioManager.speak("Hearts fully restored! Ready for learning!");
+        } else {
+          sfx.wrong();
+          audioManager.speak("You need 10 candies for a hearts refill!");
+        }
+      }
+
+      updateAvatarUI() {
+        document.getElementById('userAvatarContainer').textContent = this.equippedAvatar;
+      }
+    }
+    const shop = new ShopManager();
+
+    /* =================================================================== */
+    /* 3D ENGINE: B-01 MEKORAMA FLIGHT COMPANION (Three.js & Web Audio API) */
+    /* =================================================================== */
+    class MekoramaEngine {
+      constructor() {
+        this.container = document.getElementById('mekoramaCanvas');
+        if (!this.container) return;
+
+        this.scene = null;
+        this.camera = null;
+        this.renderer = null;
+        this.clock = new THREE.Clock();
+
+        // Robot Hierarchical Groups
+        this.robotGroup = null;
+        this.leftFlameMesh = null;
+        this.rightFlameMesh = null;
+        this.leftFireLight = null;
+        this.rightFireLight = null;
+        this.leftLeg = null;
+        this.rightLeg = null;
+        this.leftArm = null;
+        this.rightArm = null;
+        this.rightHand = null;
+
+        // Particle System for Smoke and Sparks
+        this.particleCount = 130;
+        this.particles = [];
+        this.particleGeo = null;
+        this.particleSystem = null;
+
+        // Interactive Flight Physics & Motion Tracking
+        this.targetPos = new THREE.Vector3(0, 0, 0);
+        this.currentPos = new THREE.Vector3(0, 0, 0);
+        this.velocity = new THREE.Vector3(0, 0, 0);
+        this.speed = 0;
+        this.raycaster = new THREE.Raycaster();
+        this.mouseNDC = new THREE.Vector2(0, 0);
+        this.flightPlane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
+
+        // Sound Synthesis (Web Audio API)
+        this.audioCtx = null;
+        this.jetNoiseGain = null;
+        this.jetFilter = null;
+        this.isAudioEnabled = true;
+
+        // Fly-in from far distance parameters
+        this.isCinematicFlyIn = true;
+        this.flyInTime = 0;
+        this.flyInDuration = 3.2; // seconds
+        this.flyInStartPos = new THREE.Vector3(0, 14, -38);
+        this.flyInTargetPos = new THREE.Vector3(0, 0.2, 0);
+        this.currentPos.copy(this.flyInStartPos);
+
+        // Departure blast-off flight variables
+        this.isBlastingOff = false;
+        this.blastTime = 0;
+        this.onBlastComplete = null;
+
+        // Interactive Falling Trash Cleanup System
+        this.trashItems = [];
+        this.activeTrash = null;
+        this.isTrashCleaningActive = false;
+        this.trashQueue = [];
+        this.trashSpawnTimer = 0;
+
+        this.initThree();
+        this.buildMekorama();
+        this.buildJetpackAndParticles();
+        this.bindInputEvents();
+        this.initAudioContext();
+        this.animate();
+      }
+
+      initThree() {
+        const rect = this.container.getBoundingClientRect();
+        const width = rect.width || 480;
+        const height = rect.height || 320;
+
+        // Scene
+        this.scene = new THREE.Scene();
+        // Mekorama style sky atmosphere gradient with fog
+        this.scene.background = new THREE.Color(0xbfe3f7);
+        this.scene.fog = new THREE.FogExp2(0xbfe3f7, 0.05);
+
+        // Camera
+        this.camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100);
+        this.camera.position.set(0, 0, 8.5);
+
+        // Renderer
+        this.renderer = new THREE.WebGLRenderer({
+          canvas: this.container,
+          antialias: true,
+          alpha: false,
+          powerPreference: "high-performance"
+        });
+        this.renderer.setSize(width, height);
+        this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        this.renderer.shadowMap.enabled = true;
+        this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+        // Soft Diorama Lighting
+        const hemiLight = new THREE.HemisphereLight(0xffffff, 0x475569, 0.95);
+        this.scene.add(hemiLight);
+
+        const sunLight = new THREE.DirectionalLight(0xfff7ed, 1.15);
+        sunLight.position.set(5, 8, 6);
+        sunLight.castShadow = true;
+        sunLight.shadow.mapSize.width = 512;
+        sunLight.shadow.mapSize.height = 512;
+        this.scene.add(sunLight);
+
+        const fillLight = new THREE.DirectionalLight(0x7dd3fc, 0.45);
+        fillLight.position.set(-5, -2, 4);
+        this.scene.add(fillLight);
+
+        // Responsive Resize
+        window.addEventListener('resize', () => this.onWindowResize());
+      }
+
+      onWindowResize() {
+        if (!this.container || !this.renderer || !this.camera) return;
+        const rect = this.container.getBoundingClientRect();
+        const width = rect.width;
+        const height = rect.height;
+        if (width === 0 || height === 0) return;
+        this.camera.aspect = width / height;
+        this.camera.updateProjectionMatrix();
+        this.renderer.setSize(width, height);
+      }
+
+      buildMekorama() {
+        this.robotGroup = new THREE.Group();
+
+        // 1. Procedural Texture for Chest with Footprints design (Double Size: 512x512)
+        const badgeCanvas = document.createElement('canvas');
+        badgeCanvas.width = 512;
+        badgeCanvas.height = 512;
+        const bCtx = badgeCanvas.getContext('2d');
+        bCtx.fillStyle = '#f59e0b';
+        bCtx.fillRect(0, 0, 512, 512);
+        
+        // Rivet dots around border
+        bCtx.fillStyle = '#78350f';
+        for (let i = 30; i < 490; i += 50) {
+          bCtx.beginPath();
+          bCtx.arc(i, 30, 9, 0, Math.PI * 2);
+          bCtx.arc(i, 482, 9, 0, Math.PI * 2);
+          bCtx.arc(30, i, 9, 0, Math.PI * 2);
+          bCtx.arc(482, i, 9, 0, Math.PI * 2);
+          bCtx.fill();
+        }
+
+        // Draw Footprints graphic (scaled double size)
+        bCtx.fillStyle = '#1e293b';
+        const drawFootprint = (ctx, x, y, scale, angle) => {
+          ctx.save();
+          ctx.translate(x, y);
+          ctx.rotate(angle);
+          ctx.scale(scale, scale);
+
+          // Front sole pad
+          ctx.beginPath();
+          ctx.ellipse(0, -12, 30, 38, 0, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Heel pad
+          ctx.beginPath();
+          ctx.ellipse(0, 42, 22, 26, 0, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Bridge / Arch connector
+          ctx.beginPath();
+          ctx.moveTo(-18, -4);
+          ctx.lineTo(-14, 34);
+          ctx.lineTo(20, 34);
+          ctx.lineTo(24, -4);
+          ctx.closePath();
+          ctx.fill();
+
+          // 5 toes
+          const toes = [
+            { x: -28, y: -58, r: 7.6 },
+            { x: -14, y: -68, r: 8.8 },
+            { x: 2,   y: -70, r: 9.4 },
+            { x: 18,  y: -66, r: 8.4 },
+            { x: 30,  y: -56, r: 7.2 }
+          ];
+          toes.forEach(t => {
+            ctx.beginPath();
+            ctx.arc(t.x, t.y, t.r, 0, Math.PI * 2);
+            ctx.fill();
+          });
+
+          ctx.restore();
+        };
+
+        // Left & right footprint silhouettes (doubled proportions)
+        drawFootprint(bCtx, 190, 200, 1.0, -0.14);
+        drawFootprint(bCtx, 320, 165, 1.0, 0.14);
+
+        // "Footprints" label badge (doubled text size)
+        bCtx.font = '900 52px "Fredoka", cursive, sans-serif';
+        bCtx.textAlign = 'center';
+        bCtx.textBaseline = 'middle';
+        bCtx.fillStyle = '#1e293b';
+        bCtx.fillText('Footprints', 256, 385);
+
+        const badgeTex = new THREE.CanvasTexture(badgeCanvas);
+
+        // Materials
+        const whiteMat = new THREE.MeshStandardMaterial({
+          color: 0xf8fafc,
+          roughness: 0.28,
+          metalness: 0.12
+        });
+
+        const yellowBodyMat = new THREE.MeshStandardMaterial({
+          color: 0xf59e0b,
+          roughness: 0.38,
+          metalness: 0.18
+        });
+
+        const darkMetalMat = new THREE.MeshStandardMaterial({
+          color: 0x334155,
+          roughness: 0.45,
+          metalness: 0.8
+        });
+
+        const shinyBlackEyeMat = new THREE.MeshStandardMaterial({
+          color: 0x09090b,
+          roughness: 0.05,
+          metalness: 0.85
+        });
+
+        const pupilMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+
+        // A. Torso: Cylindrical segmented body
+        const torsoGeo = new THREE.CylinderGeometry(0.72, 0.70, 0.95, 32);
+        const torso = new THREE.Mesh(torsoGeo, yellowBodyMat);
+        torso.position.y = 0;
+        torso.castShadow = true;
+        this.robotGroup.add(torso);
+
+        // Chest Badge: Curved cylindrical segment that perfectly hugs the body curvature below the collar
+        const badgeArc = Math.PI * 0.54; // ~97 degrees around front chest
+        const badgeGeo = new THREE.CylinderGeometry(0.725, 0.706, 0.52, 32, 1, true, -badgeArc / 2, badgeArc);
+        const badgeMat = new THREE.MeshStandardMaterial({
+          map: badgeTex,
+          roughness: 0.32,
+          metalness: 0.12,
+          transparent: true,
+          side: THREE.DoubleSide
+        });
+        const badgeMesh = new THREE.Mesh(badgeGeo, badgeMat);
+        badgeMesh.position.set(0, -0.04, 0);
+        this.robotGroup.add(badgeMesh);
+
+        // Neck Collar Ring
+        const neckGeo = new THREE.CylinderGeometry(0.68, 0.73, 0.1, 32);
+        const neck = new THREE.Mesh(neckGeo, darkMetalMat);
+        neck.position.y = 0.5;
+        this.robotGroup.add(neck);
+
+        // Waist Band
+        const waistGeo = new THREE.CylinderGeometry(0.72, 0.72, 0.12, 32);
+        const waist = new THREE.Mesh(waistGeo, darkMetalMat);
+        waist.position.y = -0.48;
+        this.robotGroup.add(waist);
+
+        // B. Head: White Hemispherical Dome
+        const headGeo = new THREE.SphereGeometry(0.72, 32, 24, 0, Math.PI * 2, 0, Math.PI / 2);
+        const head = new THREE.Mesh(headGeo, whiteMat);
+        head.position.y = 0.52;
+        head.castShadow = true;
+        this.robotGroup.add(head);
+
+        // C. Cyclops Eye: Recessed Socket, Shiny Black Eye & Pupil Highlight
+        const socketGeo = new THREE.TorusGeometry(0.24, 0.05, 16, 32);
+        const socket = new THREE.Mesh(socketGeo, darkMetalMat);
+        socket.position.set(0, 0.75, 0.65);
+        this.robotGroup.add(socket);
+
+        // Dedicated Eye Group for expressive winking/talking animations
+        this.eyeGroup = new THREE.Group();
+        this.eyeGroup.position.set(0, 0.75, 0.62);
+
+        const eyeGeo = new THREE.SphereGeometry(0.22, 24, 24);
+        this.eyeMesh = new THREE.Mesh(eyeGeo, shinyBlackEyeMat);
+        this.eyeGroup.add(this.eyeMesh);
+
+        const pupilGeo = new THREE.SphereGeometry(0.065, 16, 16);
+        this.pupilMesh = new THREE.Mesh(pupilGeo, pupilMat);
+        this.pupilMesh.position.set(0.06, 0.07, 0.19);
+        this.eyeGroup.add(this.pupilMesh);
+
+        this.robotGroup.add(this.eyeGroup);
+
+        // D. Articulated Arms and Clamped Hands
+        const armMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.4, metalness: 0.7 });
+        const handMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, roughness: 0.35, metalness: 0.2 });
+
+        // Left Arm Group
+        this.leftArm = new THREE.Group();
+        this.leftArm.position.set(-0.85, 0.15, 0);
+
+        const shoulderGeo = new THREE.SphereGeometry(0.12, 16, 16);
+        const leftShoulder = new THREE.Mesh(shoulderGeo, armMat);
+        this.leftArm.add(leftShoulder);
+
+        const limbGeo = new THREE.CylinderGeometry(0.06, 0.06, 0.45, 16);
+        const leftUpperArm = new THREE.Mesh(limbGeo, armMat);
+        leftUpperArm.position.set(-0.06, -0.22, 0);
+        leftUpperArm.rotation.z = 0.25;
+        this.leftArm.add(leftUpperArm);
+
+        // Left Hand
+        const handGeo = new THREE.SphereGeometry(0.11, 16, 16);
+        const leftHand = new THREE.Mesh(handGeo, handMat);
+        leftHand.position.set(-0.12, -0.48, 0);
+        this.leftArm.add(leftHand);
+        this.robotGroup.add(this.leftArm);
+
+        // Right Arm Group (waving mechanic)
+        this.rightArm = new THREE.Group();
+        this.rightArm.position.set(0.85, 0.15, 0);
+
+        const rightShoulder = new THREE.Mesh(shoulderGeo, armMat);
+        this.rightArm.add(rightShoulder);
+
+        const rightUpperArm = new THREE.Mesh(limbGeo, armMat);
+        rightUpperArm.position.set(0.06, -0.22, 0);
+        rightUpperArm.rotation.z = -0.25;
+        this.rightArm.add(rightUpperArm);
+
+        this.rightHand = new THREE.Mesh(handGeo, handMat);
+        this.rightHand.position.set(0.12, -0.48, 0);
+        this.rightArm.add(this.rightHand);
+        this.robotGroup.add(this.rightArm);
+
+        // E. Jointed Stilt Legs
+        const legMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.5, metalness: 0.7 });
+        const footMat = new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.4, metalness: 0.6 });
+
+        // Left Leg Group
+        this.leftLeg = new THREE.Group();
+        this.leftLeg.position.set(-0.35, -0.52, 0);
+        const upperLegGeo = new THREE.CylinderGeometry(0.07, 0.07, 0.5, 16);
+        const leftLegMesh = new THREE.Mesh(upperLegGeo, legMat);
+        leftLegMesh.position.y = -0.25;
+        this.leftLeg.add(leftLegMesh);
+
+        const footGeo = new THREE.BoxGeometry(0.18, 0.1, 0.28);
+        const leftFootMesh = new THREE.Mesh(footGeo, footMat);
+        leftFootMesh.position.set(0, -0.52, 0.04);
+        this.leftLeg.add(leftFootMesh);
+        this.robotGroup.add(this.leftLeg);
+
+        // Right Leg Group
+        this.rightLeg = new THREE.Group();
+        this.rightLeg.position.set(0.35, -0.52, 0);
+        const rightLegMesh = new THREE.Mesh(upperLegGeo, legMat);
+        rightLegMesh.position.y = -0.25;
+        this.rightLeg.add(rightLegMesh);
+
+        const rightFootMesh = new THREE.Mesh(footGeo, footMat);
+        rightFootMesh.position.set(0, -0.52, 0.04);
+        this.rightLeg.add(rightFootMesh);
+        this.robotGroup.add(this.rightLeg);
+
+        this.scene.add(this.robotGroup);
+      }
+
+      buildJetpackAndParticles() {
+        const jetpackGroup = new THREE.Group();
+        jetpackGroup.position.set(0, 0.05, -0.72);
+
+        const steelMat = new THREE.MeshStandardMaterial({
+          color: 0x64748b,
+          roughness: 0.3,
+          metalness: 0.85
+        });
+
+        const darkMountMat = new THREE.MeshStandardMaterial({
+          color: 0x1e293b,
+          roughness: 0.6,
+          metalness: 0.6
+        });
+
+        // Cross Mount Straps
+        const strapGeo = new THREE.BoxGeometry(0.85, 0.18, 0.12);
+        const strap = new THREE.Mesh(strapGeo, darkMountMat);
+        strap.position.set(0, 0.05, 0.05);
+        jetpackGroup.add(strap);
+
+        // Dual Cylinder Fuel Tanks
+        const tankGeo = new THREE.CylinderGeometry(0.24, 0.24, 0.85, 24);
+        const capGeo = new THREE.SphereGeometry(0.24, 20, 16, 0, Math.PI * 2, 0, Math.PI / 2);
+
+        [-0.32, 0.32].forEach((xPos) => {
+          const tank = new THREE.Mesh(tankGeo, steelMat);
+          tank.position.set(xPos, 0.05, 0);
+          jetpackGroup.add(tank);
+
+          const cap = new THREE.Mesh(capGeo, steelMat);
+          cap.position.set(xPos, 0.47, 0);
+          jetpackGroup.add(cap);
+
+          // Nozzle Bells
+          const nozzleGeo = new THREE.CylinderGeometry(0.18, 0.28, 0.32, 20, 1, true);
+          const nozzleMat = new THREE.MeshStandardMaterial({
+            color: 0x0f172a,
+            metalness: 0.9,
+            roughness: 0.2,
+            side: THREE.DoubleSide
+          });
+          const nozzle = new THREE.Mesh(nozzleGeo, nozzleMat);
+          nozzle.position.set(xPos, -0.48, 0);
+          jetpackGroup.add(nozzle);
+        });
+
+        // Pulsating Thrust Cones (Yellow/Orange/Red Emissive Core)
+        const flameGeo = new THREE.ConeGeometry(0.22, 0.75, 20);
+        flameGeo.rotateX(Math.PI); // Point downwards
+        const flameMat = new THREE.MeshBasicMaterial({
+          color: 0xffaa00,
+          transparent: true,
+          opacity: 0.9
+        });
+
+        this.leftFlameMesh = new THREE.Mesh(flameGeo, flameMat);
+        this.leftFlameMesh.position.set(-0.32, -0.92, 0);
+        jetpackGroup.add(this.leftFlameMesh);
+
+        this.rightFlameMesh = new THREE.Mesh(flameGeo, flameMat.clone());
+        this.rightFlameMesh.position.set(0.32, -0.92, 0);
+        jetpackGroup.add(this.rightFlameMesh);
+
+        // Flickering Thruster Point Lights
+        this.leftFireLight = new THREE.PointLight(0xff7700, 2.2, 5);
+        this.leftFireLight.position.set(-0.32, -1.0, 0);
+        jetpackGroup.add(this.leftFireLight);
+
+        this.rightFireLight = new THREE.PointLight(0xff9900, 2.2, 5);
+        this.rightFireLight.position.set(0.32, -1.0, 0);
+        jetpackGroup.add(this.rightFireLight);
+
+        this.robotGroup.add(jetpackGroup);
+
+        // Smoke and Fire Trail Particle Pool
+        this.particleGeo = new THREE.BufferGeometry();
+        const positions = new Float32Array(this.particleCount * 3);
+        const colors = new Float32Array(this.particleCount * 3);
+
+        this.particles = [];
+        for (let i = 0; i < this.particleCount; i++) {
+          positions[i * 3] = 0;
+          positions[i * 3 + 1] = -100;
+          positions[i * 3 + 2] = 0;
+
+          colors[i * 3] = 1;
+          colors[i * 3 + 1] = 0.6;
+          colors[i * 3 + 2] = 0.2;
+
+          this.particles.push({
+            alive: false,
+            life: 0,
+            maxLife: 1.0,
+            pos: new THREE.Vector3(),
+            vel: new THREE.Vector3(),
+            isSpark: false
+          });
+        }
+
+        this.particleGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        this.particleGeo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+        // Procedural Circular Soft Particle Texture
+        const pCanvas = document.createElement('canvas');
+        pCanvas.width = 64;
+        pCanvas.height = 64;
+        const pCtx = pCanvas.getContext('2d');
+        const grad = pCtx.createRadialGradient(32, 32, 0, 32, 32, 32);
+        grad.addColorStop(0, 'rgba(255,255,255,1)');
+        grad.addColorStop(0.4, 'rgba(255,255,255,0.7)');
+        grad.addColorStop(1, 'rgba(255,255,255,0)');
+        pCtx.fillStyle = grad;
+        pCtx.fillRect(0, 0, 64, 64);
+        const pTex = new THREE.CanvasTexture(pCanvas);
+
+        const particleMat = new THREE.PointsMaterial({
+          size: 0.45,
+          map: pTex,
+          vertexColors: true,
+          transparent: true,
+          opacity: 0.8,
+          depthWrite: false,
+          blending: THREE.NormalBlending
+        });
+
+        this.particleSystem = new THREE.Points(this.particleGeo, particleMat);
+        this.scene.add(this.particleSystem);
+      }
+
+      createTrashMesh(type) {
+        const group = new THREE.Group();
+        if (type === 'can') {
+          // Large bright Red Soda Can
+          const bodyGeo = new THREE.CylinderGeometry(0.32, 0.32, 0.75, 20);
+          const bodyMat = new THREE.MeshStandardMaterial({ color: 0xef4444, metalness: 0.85, roughness: 0.25 });
+          const rimMat = new THREE.MeshStandardMaterial({ color: 0xf1f5f9, metalness: 0.95, roughness: 0.15 });
+          const body = new THREE.Mesh(bodyGeo, bodyMat);
+          const topRim = new THREE.Mesh(new THREE.CylinderGeometry(0.325, 0.325, 0.08, 20), rimMat);
+          topRim.position.y = 0.38;
+          const botRim = new THREE.Mesh(new THREE.CylinderGeometry(0.325, 0.325, 0.08, 20), rimMat);
+          botRim.position.y = -0.38;
+          group.add(body, topRim, botRim);
+        } else if (type === 'bottle') {
+          // Large translucent Cyan Plastic Bottle with Dark Blue Cap
+          const botGeo = new THREE.CylinderGeometry(0.28, 0.28, 0.82, 20);
+          const botMat = new THREE.MeshStandardMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.88, roughness: 0.1, metalness: 0.1 });
+          const neckGeo = new THREE.CylinderGeometry(0.12, 0.26, 0.24, 20);
+          const capMat = new THREE.MeshStandardMaterial({ color: 0x1d4ed8, roughness: 0.3, metalness: 0.5 });
+          const cap = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.14, 0.12, 20), capMat);
+          const bot = new THREE.Mesh(botGeo, botMat);
+          const neck = new THREE.Mesh(neckGeo, botMat);
+          neck.position.y = 0.46;
+          cap.position.y = 0.60;
+          group.add(bot, neck, cap);
+        } else if (type === 'paper') {
+          // High-contrast Crumpled Paper Ball
+          const paperGeo = new THREE.DodecahedronGeometry(0.42, 1);
+          const paperMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.95 });
+          const paper = new THREE.Mesh(paperGeo, paperMat);
+          group.add(paper);
+        } else {
+          // Large Cardboard Shipping Box with bright accents
+          const boxGeo = new THREE.BoxGeometry(0.68, 0.62, 0.5);
+          const boxMat = new THREE.MeshStandardMaterial({ color: 0xd97706, roughness: 0.75 });
+          const box = new THREE.Mesh(boxGeo, boxMat);
+          group.add(box);
+        }
+        return group;
+      }
+
+      startTrashCleaningSequence(onFinished) {
+        this.isTrashCleaningActive = true;
+        this.onTrashCleaningDone = onFinished;
+        this.trashQueue = ['can', 'bottle', 'paper', 'box'];
+        this.trashSpawnTimer = 0.3;
+      }
+
+      spawnNextTrash() {
+        if (this.trashQueue.length === 0) return;
+        const type = this.trashQueue.shift();
+        const mesh = this.createTrashMesh(type);
+        const spawnX = (Math.random() - 0.5) * 3.8;
+        mesh.position.set(spawnX, 3.2, 0);
+        this.scene.add(mesh);
+
+        this.activeTrash = {
+          mesh: mesh,
+          rotVel: new THREE.Vector3((Math.random() - 0.5) * 3.5, (Math.random() - 0.5) * 3.5, (Math.random() - 0.5) * 3.5),
+          fallSpeed: 1.55 + Math.random() * 0.35
+        };
+      }
+
+      bindInputEvents() {
+        const updatePointer = (clientX, clientY) => {
+          // Allow full user mouse/touch control at all times, including during trash cleanup!
+          const rect = this.container.getBoundingClientRect();
+          if (rect.width === 0 || rect.height === 0) return;
+          this.mouseNDC.x = ((clientX - rect.left) / rect.width) * 2 - 1;
+          this.mouseNDC.y = -((clientY - rect.top) / rect.height) * 2 + 1;
+
+          this.raycaster.setFromCamera(this.mouseNDC, this.camera);
+          const intersectPoint = new THREE.Vector3();
+          this.raycaster.ray.intersectPlane(this.flightPlane, intersectPoint);
+
+          if (intersectPoint) {
+            this.targetPos.x = THREE.MathUtils.clamp(intersectPoint.x, -3.2, 3.2);
+            this.targetPos.y = THREE.MathUtils.clamp(intersectPoint.y, -2.1, 2.1);
+          }
+        };
+
+        this.container.addEventListener('mousemove', (e) => {
+          updatePointer(e.clientX, e.clientY);
+        });
+
+        this.container.addEventListener('touchmove', (e) => {
+          if (e.touches && e.touches[0]) {
+            updatePointer(e.touches[0].clientX, e.touches[0].clientY);
+          }
+        }, { passive: true });
+
+        this.container.addEventListener('touchstart', (e) => {
+          if (e.touches && e.touches[0]) {
+            updatePointer(e.touches[0].clientX, e.touches[0].clientY);
+          }
+        }, { passive: true });
+      }
+
+      toggleAudio() {
+        sfx.click();
+        this.isAudioEnabled = !this.isAudioEnabled;
+        const btnIcon = document.getElementById('jetpackAudioIcon');
+        const btnLabel = document.getElementById('jetpackAudioLabel');
+
+        if (this.isAudioEnabled) {
+          this.initAudioContext();
+          if (btnIcon) btnIcon.className = "fa-solid fa-volume-high text-emerald-400";
+          if (btnLabel) btnLabel.textContent = "Sound ON";
+        } else {
+          if (this.jetNoiseGain && this.audioCtx) {
+            this.jetNoiseGain.gain.setTargetAtTime(0, this.audioCtx.currentTime, 0.05);
+          }
+          if (btnIcon) btnIcon.className = "fa-solid fa-volume-xmark text-slate-300";
+          if (btnLabel) btnLabel.textContent = "Sound OFF";
+        }
+      }
+
+      initAudioContext() {
+        try {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          if (!this.audioCtx) {
+            this.audioCtx = new AudioContext();
+          }
+          if (this.audioCtx.state === 'suspended') {
+            this.audioCtx.resume();
+          }
+
+          if (!this.jetNoiseGain) {
+            const bufferSize = 2 * this.audioCtx.sampleRate;
+            const noiseBuffer = this.audioCtx.createBuffer(1, bufferSize, this.audioCtx.sampleRate);
+            const output = noiseBuffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) {
+              output[i] = Math.random() * 2 - 1;
+            }
+
+            const whiteNoise = this.audioCtx.createBufferSource();
+            whiteNoise.buffer = noiseBuffer;
+            whiteNoise.loop = true;
+
+            this.jetFilter = this.audioCtx.createBiquadFilter();
+            this.jetFilter.type = 'bandpass';
+            this.jetFilter.frequency.setValueAtTime(380, this.audioCtx.currentTime);
+            this.jetFilter.Q.setValueAtTime(1.8, this.audioCtx.currentTime);
+
+            this.jetNoiseGain = this.audioCtx.createGain();
+            this.jetNoiseGain.gain.setValueAtTime(0.08, this.audioCtx.currentTime);
+
+            whiteNoise.connect(this.jetFilter);
+            this.jetFilter.connect(this.jetNoiseGain);
+            this.jetNoiseGain.connect(this.audioCtx.destination);
+            whiteNoise.start();
+          } else {
+            this.jetNoiseGain.gain.setTargetAtTime(0.08, this.audioCtx.currentTime, 0.05);
+          }
+        } catch (e) {
+          console.warn("Web Audio Rocket Thruster unavailable:", e);
+        }
+      }
+
+      playBlastSound() {
+        if (!this.audioCtx) this.initAudioContext();
+        if (this.audioCtx && this.audioCtx.state === 'suspended') {
+          this.audioCtx.resume();
+        }
+        try {
+          const t = this.audioCtx.currentTime;
+          // Intensify jet thrust noise
+          if (this.jetNoiseGain && this.jetFilter) {
+            this.jetFilter.frequency.setValueAtTime(450, t);
+            this.jetFilter.frequency.exponentialRampToValueAtTime(3600, t + 0.35);
+            this.jetNoiseGain.gain.setValueAtTime(0.35, t);
+            this.jetNoiseGain.gain.linearRampToValueAtTime(0.75, t + 0.3);
+            this.jetNoiseGain.gain.exponentialRampToValueAtTime(0.001, t + 1.35);
+          }
+          // Deep low-frequency booster rumble oscillator
+          const osc = this.audioCtx.createOscillator();
+          const oscGain = this.audioCtx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(95, t);
+          osc.frequency.exponentialRampToValueAtTime(40, t + 1.25);
+          oscGain.gain.setValueAtTime(0.55, t);
+          oscGain.gain.exponentialRampToValueAtTime(0.001, t + 1.3);
+          osc.connect(oscGain);
+          oscGain.connect(this.audioCtx.destination);
+          osc.start(t);
+          osc.stop(t + 1.3);
+        } catch (e) {
+          console.warn("Blast audio error:", e);
+        }
+      }
+
+      triggerBlastOff(onComplete) {
+        this.isBlastingOff = true;
+        this.blastTime = 0;
+        this.onBlastComplete = onComplete;
+        this.playBlastSound();
+      }
+
+      emitAndStepParticles(delta) {
+        if (!this.particleGeo || !this.particles) return;
+        const posAttr = this.particleGeo.attributes.position;
+        const colAttr = this.particleGeo.attributes.color;
+
+        const leftNozzleWorld = new THREE.Vector3(-0.32, -0.92, -0.72);
+        const rightNozzleWorld = new THREE.Vector3(0.32, -0.92, -0.72);
+        leftNozzleWorld.applyMatrix4(this.robotGroup.matrixWorld);
+        rightNozzleWorld.applyMatrix4(this.robotGroup.matrixWorld);
+
+        const spawnCount = Math.floor(2 + this.speed * 1.5);
+        for (let s = 0; s < spawnCount; s++) {
+          const p = this.particles.find(pt => !pt.alive);
+          if (p) {
+            p.alive = true;
+            p.life = 0;
+            p.maxLife = 0.5 + Math.random() * 0.6;
+            const nozzle = Math.random() < 0.5 ? leftNozzleWorld : rightNozzleWorld;
+            p.pos.copy(nozzle);
+            p.pos.x += (Math.random() - 0.5) * 0.15;
+            p.pos.z += (Math.random() - 0.5) * 0.15;
+
+            p.vel.set(
+              (Math.random() - 0.5) * 0.8 - this.velocity.x * 0.25,
+              -2.5 - Math.random() * 2.5 - this.speed * 0.5,
+              (Math.random() - 0.5) * 0.8 - 0.5
+            );
+
+            p.isSpark = Math.random() < 0.4;
+          }
+        }
+
+        for (let i = 0; i < this.particleCount; i++) {
+          const p = this.particles[i];
+          if (p.alive) {
+            p.life += delta;
+            if (p.life >= p.maxLife) {
+              p.alive = false;
+              posAttr.setXYZ(i, 0, -100, 0);
+            } else {
+              p.pos.addScaledVector(p.vel, delta);
+              p.vel.y += 0.8 * delta;
+              posAttr.setXYZ(i, p.pos.x, p.pos.y, p.pos.z);
+
+              const progress = p.life / p.maxLife;
+              if (p.isSpark) {
+                colAttr.setXYZ(i, 1.0, 0.7 * (1 - progress), 0.1);
+              } else {
+                const grey = 0.35 + (1 - progress) * 0.3;
+                colAttr.setXYZ(i, grey, grey, grey);
+              }
+            }
+          } else {
+            posAttr.setXYZ(i, 0, -100, 0);
+          }
+        }
+
+        posAttr.needsUpdate = true;
+        colAttr.needsUpdate = true;
+      }
+
+      animate() {
+        requestAnimationFrame(() => this.animate());
+
+        const delta = this.clock.getDelta();
+        const time = this.clock.getElapsedTime();
+
+        if (this.isBlastingOff) {
+          this.blastTime += delta;
+          this.speed = 22.0;
+
+          // Rapid rocket upward and forward acceleration
+          const accel = 20 + this.blastTime * 42;
+          this.currentPos.y += accel * delta;
+          this.currentPos.z -= (accel * 0.85) * delta;
+          this.currentPos.x += (Math.random() - 0.5) * 0.09; // Intense mechanical engine shudder
+
+          this.robotGroup.position.set(this.currentPos.x, this.currentPos.y, this.currentPos.z);
+          this.robotGroup.rotation.x = THREE.MathUtils.lerp(this.robotGroup.rotation.x, -0.68, 0.18);
+
+          // Giant thrust cones & bright lighting
+          if (this.leftFlameMesh && this.rightFlameMesh) {
+            const blastScaleY = 3.8 + Math.random() * 1.6;
+            this.leftFlameMesh.scale.set(1.6, blastScaleY, 1.6);
+            this.rightFlameMesh.scale.set(1.6, blastScaleY, 1.6);
+          }
+          if (this.leftFireLight && this.rightFireLight) {
+            this.leftFireLight.intensity = 7.5;
+            this.rightFireLight.intensity = 7.5;
+          }
+
+          this.emitAndStepParticles(delta);
+          this.renderer.render(this.scene, this.camera);
+
+          // Once the robot has zoomed out of view
+          if (this.blastTime >= 1.25) {
+            this.isBlastingOff = false;
+            if (this.jetNoiseGain && this.audioCtx) {
+              this.jetNoiseGain.gain.setValueAtTime(0, this.audioCtx.currentTime);
+            }
+            if (this.onBlastComplete) {
+              const cb = this.onBlastComplete;
+              this.onBlastComplete = null;
+              cb();
+            }
+          }
+          return;
+        }
+
+        // 1. Cinematic Far Fly-In Sequence or Interactive Cursor Tracking
+        if (this.isCinematicFlyIn) {
+          this.flyInTime += delta;
+          const progress = Math.min(this.flyInTime / this.flyInDuration, 1.0);
+          
+          const easeOut = 1 - Math.pow(1 - progress, 3);
+          this.currentPos.x = THREE.MathUtils.lerp(this.flyInStartPos.x, this.flyInTargetPos.x, easeOut) + Math.sin(time * 3) * 0.4;
+          this.currentPos.y = THREE.MathUtils.lerp(this.flyInStartPos.y, this.flyInTargetPos.y, easeOut);
+          this.currentPos.z = THREE.MathUtils.lerp(this.flyInStartPos.z, this.flyInTargetPos.z, easeOut);
+
+          this.speed = 6.0 * (1.0 - progress * 0.65);
+
+          if (progress >= 1.0) {
+            this.isCinematicFlyIn = false;
+            this.targetPos.set(0, 0, 0);
+            if (robotIntroManager) {
+              robotIntroManager.onFlyInArrival();
+            }
+          }
+        } else {
+          // Interactive trash falling and player catching logic
+          if (this.isTrashCleaningActive) {
+            if (this.activeTrash) {
+              // Update falling trash position and tumbling rotation
+              this.activeTrash.mesh.position.y -= this.activeTrash.fallSpeed * delta;
+              this.activeTrash.mesh.rotation.x += this.activeTrash.rotVel.x * delta;
+              this.activeTrash.mesh.rotation.y += this.activeTrash.rotVel.y * delta;
+              this.activeTrash.mesh.rotation.z += this.activeTrash.rotVel.z * delta;
+
+              // Check if player moved robot close enough to catch the piece of trash!
+              const distToTrash = this.currentPos.distanceTo(this.activeTrash.mesh.position);
+              if (distToTrash < 1.25) {
+                // Success catch! Sound effect, spark bursts, and remove mesh
+                sfx.playTone(880, 'triangle', 0.15, 0.3);
+                setTimeout(() => sfx.playTone(1174.66, 'sine', 0.18, 0.3), 80);
+                this.scene.remove(this.activeTrash.mesh);
+                this.activeTrash = null;
+
+                // Brief pause before next piece of trash drops
+                if (this.trashQueue.length > 0) {
+                  this.trashSpawnTimer = 0.5;
+                } else {
+                  // All trash successfully cleaned up by player!
+                  this.isTrashCleaningActive = false;
+                  sfx.winFanfare();
+                  if (this.onTrashCleaningDone) {
+                    const cb = this.onTrashCleaningDone;
+                    this.onTrashCleaningDone = null;
+                    cb();
+                  }
+                }
+              } else if (this.activeTrash.mesh.position.y < -3.4) {
+                // If it fell past bottom screen without catching, drop it again from top so player can catch it!
+                this.activeTrash.mesh.position.set((Math.random() - 0.5) * 3.8, 3.2, 0);
+              }
+            } else if (this.trashSpawnTimer > 0) {
+              this.trashSpawnTimer -= delta;
+              if (this.trashSpawnTimer <= 0) {
+                this.spawnNextTrash();
+              }
+            }
+          }
+
+          const prevX = this.currentPos.x;
+          const prevY = this.currentPos.y;
+          const trackingTightness = 0.085;
+          this.currentPos.x += (this.targetPos.x - this.currentPos.x) * (trackingTightness + Math.min(delta, 0.05));
+          this.currentPos.y += (this.targetPos.y - this.currentPos.y) * (trackingTightness + Math.min(delta, 0.05));
+          this.currentPos.z += (0 - this.currentPos.z) * 0.1;
+
+          this.velocity.x = (this.currentPos.x - prevX) / Math.max(delta, 0.016);
+          this.velocity.y = (this.currentPos.y - prevY) / Math.max(delta, 0.016);
+          this.speed = Math.sqrt(this.velocity.x * this.velocity.x + this.velocity.y * this.velocity.y);
+        }
+
+        // Modulate Rocket Audio with Speed (duck volume slightly if robot is speaking)
+        if (this.isAudioEnabled && this.jetFilter && this.jetNoiseGain && this.audioCtx) {
+          const isRobotSpeaking = (typeof robotIntroManager !== 'undefined' && robotIntroManager.isSpeaking);
+          const targetFreq = 300 + Math.min(this.speed * 180, 1600);
+          const baseGain = isRobotSpeaking ? 0.025 : 0.05;
+          const targetGain = baseGain + Math.min(this.speed * (isRobotSpeaking ? 0.015 : 0.035), isRobotSpeaking ? 0.08 : 0.22);
+          this.jetFilter.frequency.setTargetAtTime(targetFreq, this.audioCtx.currentTime, 0.05);
+          this.jetNoiseGain.gain.setTargetAtTime(targetGain, this.audioCtx.currentTime, 0.05);
+        }
+
+        // Characteristic Mekorama Gentle Wobble Hover
+        const hoverWobbleY = Math.sin(time * 3.5) * 0.08;
+        const hoverWobbleRotZ = Math.cos(time * 2.8) * 0.03;
+
+        this.robotGroup.position.set(this.currentPos.x, this.currentPos.y + hoverWobbleY, this.currentPos.z);
+
+        // Flight Banking and Tilt Physics
+        const targetRoll = -this.velocity.x * 0.09 + hoverWobbleRotZ;
+        const targetPitch = this.velocity.y * 0.07 - (this.isCinematicFlyIn ? 0.35 : 0.15);
+        const targetYaw = this.velocity.x * 0.04;
+
+        this.robotGroup.rotation.z += (targetRoll - this.robotGroup.rotation.z) * 0.1;
+        this.robotGroup.rotation.x += (targetPitch - this.robotGroup.rotation.x) * 0.1;
+        this.robotGroup.rotation.y += (targetYaw - this.robotGroup.rotation.y) * 0.1;
+
+        // Animate Arms: Steady flight posture, no waving with hand
+        if (this.isCinematicFlyIn) {
+          if (this.rightArm) {
+            this.rightArm.rotation.set(0.65, 0, -0.25);
+          }
+          if (this.leftArm) {
+            this.leftArm.rotation.set(0.65, 0, 0.25);
+          }
+        } else if (this.isTrashCleaningActive && this.activeTrash) {
+          // Reaching arms forward to catch falling trash
+          if (this.rightArm) {
+            this.rightArm.rotation.set(1.2, 0.3, -0.4);
+          }
+          if (this.leftArm) {
+            this.leftArm.rotation.set(1.2, -0.3, 0.4);
+          }
+        } else {
+          // Steady hovering posture holding at sides (no hand wave)
+          if (this.rightArm) {
+            this.rightArm.rotation.z = -0.28 + Math.sin(time * 2.8) * 0.06;
+            this.rightArm.rotation.x = 0.15 + Math.cos(time * 2.2) * 0.05;
+            this.rightArm.rotation.y = 0;
+            if (this.rightHand) {
+              this.rightHand.rotation.set(0, 0, 0);
+            }
+          }
+          if (this.leftArm) {
+            this.leftArm.rotation.z = 0.28 - Math.sin(time * 2.8) * 0.06;
+            this.leftArm.rotation.x = 0.15 + Math.cos(time * 2.2) * 0.05;
+          }
+        }
+
+        // Eye Winking Animation: Squints and winks rhythmically while speaking
+        const isRobotSpeaking = (typeof robotIntroManager !== 'undefined' && robotIntroManager.isSpeaking) ||
+                                (window.speechSynthesis && window.speechSynthesis.speaking && !this.isCinematicFlyIn);
+
+        if (this.eyeGroup) {
+          if (isRobotSpeaking) {
+            // Rhythmic speech squints / winks simulating talking
+            const talkCycle = Math.sin(time * 16);
+            const secondaryPulse = Math.sin(time * 6.5);
+            let talkScaleY = 0.5 + 0.5 * talkCycle;
+            if (secondaryPulse > 0.35) {
+              talkScaleY = Math.max(0.12, talkScaleY * 0.35); // Accent wink
+            }
+            this.eyeGroup.scale.y = Math.max(0.12, Math.min(1.05, talkScaleY));
+          } else {
+            // Natural occasional blink during hover
+            const blinkTime = (time * 0.8) % 3.6;
+            let normalScaleY = 1.0;
+            if (blinkTime > 3.35) {
+              const p = (blinkTime - 3.35) / 0.25;
+              normalScaleY = Math.max(0.1, 1.0 - Math.sin(p * Math.PI) * 0.9);
+            }
+            this.eyeGroup.scale.y = normalScaleY;
+          }
+        }
+
+        // Legs In Dangle
+        if (this.leftLeg && this.rightLeg) {
+          const legLag = THREE.MathUtils.clamp(-this.velocity.y * 0.08, -0.3, 0.4);
+          this.leftLeg.rotation.x = legLag + Math.sin(time * 4) * 0.08;
+          this.rightLeg.rotation.x = legLag - Math.sin(time * 4) * 0.08;
+          this.leftLeg.rotation.z = -this.velocity.x * 0.05;
+          this.rightLeg.rotation.z = -this.velocity.x * 0.05;
+        }
+
+        // Pulsating Nozzle Flames & Lights
+        const flameJitter = 1.0 + Math.random() * 0.35 + (this.speed * 0.18);
+        const flameScaleY = THREE.MathUtils.clamp(flameJitter, 0.8, 2.6);
+        if (this.leftFlameMesh && this.rightFlameMesh) {
+          this.leftFlameMesh.scale.set(1.0 + Math.random() * 0.15, flameScaleY, 1.0);
+          this.rightFlameMesh.scale.set(1.0 + Math.random() * 0.15, flameScaleY, 1.0);
+        }
+
+        const lightPower = 2.0 + Math.random() * 1.5 + (this.speed * 0.4);
+        if (this.leftFireLight && this.rightFireLight) {
+          this.leftFireLight.intensity = lightPower;
+          this.rightFireLight.intensity = lightPower;
+        }
+
+        this.emitAndStepParticles(delta);
+
+        this.renderer.render(this.scene, this.camera);
+      }
+
+      resetFlyIn() {
+        this.isCinematicFlyIn = true;
+        this.isBlastingOff = false;
+        this.blastTime = 0;
+        this.flyInTime = 0;
+        this.currentPos.copy(this.flyInStartPos);
+        if (this.robotGroup) {
+          this.robotGroup.rotation.set(0, 0, 0);
+        }
+        if (this.isAudioEnabled) {
+          this.initAudioContext();
+        }
+      }
+    }
+
+    /* Controller for the initial separate B-01 Welcome Window */
+    class RobotIntroManager {
+      constructor() {
+        this.modal = document.getElementById('robotIntroModal');
+        this.isSpeaking = false;
+        this.hasSpokenIntro = false;
+        this.isBlastingOff = false;
+        this.isCleaningTrash = false;
+        this.welcomeEnglishText = "Welcome to 5th Grade Science! Today we will study Natural Resources and the Environment!! You will learn so much: each unit has videos, animations, and a quiz. You can do this, let's go champion, just do it!!";
+        this.cleanTrashEnglishText = "It is necessary that all of us clean the world from garbage, let's go!!";
+      }
+
+      showIntro() {
+        if (!this.modal) return;
+        this.modal.classList.remove('hidden');
+        this.isSpeaking = false;
+        this.hasSpokenIntro = false;
+        this.isBlastingOff = false;
+        this.isCleaningTrash = false;
+
+        // Ensure no banners or HUDs appear while the robot is flying in
+        const topHud = document.getElementById('robotTopHud');
+        const bottomHud = document.getElementById('robotBottomHud');
+        if (topHud) {
+          topHud.classList.remove('opacity-100');
+          topHud.classList.add('opacity-0');
+        }
+        if (bottomHud) {
+          bottomHud.classList.remove('opacity-100', 'translate-y-0');
+          bottomHud.classList.add('opacity-0', 'translate-y-6');
+        }
+        if (mekoramaEngine) {
+          mekoramaEngine.resetFlyIn();
+          mekoramaEngine.initAudioContext();
+          mekoramaEngine.onWindowResize();
+        }
+      }
+
+      onFlyInArrival() {
+        const topHud = document.getElementById('robotTopHud');
+        if (topHud) {
+          topHud.classList.remove('opacity-0');
+          topHud.classList.add('opacity-100');
+        }
+        sfx.winFanfare();
+
+        // Automatically start speaking in English upon reaching the front
+        setTimeout(() => {
+          this.speakMessage();
+        }, 200);
+      }
+
+      speakMessage() {
+        this.isSpeaking = true;
+        this.hasSpokenIntro = true;
+        audioManager.speak(this.welcomeEnglishText, () => {
+          this.isSpeaking = false;
+          // After finishing the welcome message: trash drops one by one and player moves mouse to catch it!
+          this.startTrashCatchingSequence();
+        });
+      }
+
+      startTrashCatchingSequence() {
+        this.isCleaningTrash = true;
+        // Robot speaks the motivating voice line in English while player catches the trash
+        setTimeout(() => {
+          this.isSpeaking = true;
+          audioManager.speak(this.cleanTrashEnglishText, () => {
+            this.isSpeaking = false;
+          });
+        }, 200);
+
+        if (mekoramaEngine) {
+          mekoramaEngine.startTrashCleaningSequence(() => {
+            // Once all trash items are caught by the user, reveal the action button
+            this.isCleaningTrash = false;
+            const bottomHud = document.getElementById('robotBottomHud');
+            if (bottomHud) {
+              bottomHud.classList.remove('opacity-0', 'translate-y-6');
+              bottomHud.classList.add('opacity-100', 'translate-y-0');
+            }
+          });
+        }
+      }
+
+      dismissIntro() {
+        if (this.isBlastingOff) return;
+        this.isBlastingOff = true;
+        this.isSpeaking = false;
+        audioManager.silence();
+
+        // Hide top & bottom HUDs immediately during blast-off
+        const topHud = document.getElementById('robotTopHud');
+        const bottomHud = document.getElementById('robotBottomHud');
+        if (topHud) {
+          topHud.classList.remove('opacity-100');
+          topHud.classList.add('opacity-0');
+        }
+        if (bottomHud) {
+          bottomHud.classList.remove('opacity-100', 'translate-y-0');
+          bottomHud.classList.add('opacity-0', 'translate-y-6');
+        }
+
+        // Trigger blast off sequence with sound, massive flames and upward departure
+        if (mekoramaEngine) {
+          mekoramaEngine.triggerBlastOff(() => {
+            if (this.modal) {
+              this.modal.classList.add('hidden');
+            }
+            this.isBlastingOff = false;
+            app.showScreen('welcome');
+            audioManager.speak("Ready to begin! Choose Unit 1 to explore Natural Resources.");
+          });
+        } else {
+          if (this.modal) {
+            this.modal.classList.add('hidden');
+          }
+          this.isBlastingOff = false;
+          app.showScreen('welcome');
+          audioManager.speak("Ready to begin! Choose Unit 1 to explore Natural Resources.");
+        }
+      }
+    }
+    const robotIntroManager = new RobotIntroManager();
+
+    class MainApp {
+      constructor() {
+        this.studentName = "Leo the Explorer";
+        this.currentChapterId = 1;
+        this.candies = 20;
+        this.scores = { 1: 0, 2: 0, 3: 0 };
+        this.init();
+      }
+
+      init() {
+        this.updateStatsUI();
+        this.bindEvents();
+      }
+
+      bindEvents() {
+        // Secret Shortcut Ctrl + U or Cmd + U for Instructor bypass
+        window.addEventListener('keydown', (e) => {
+          if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'u') {
+            e.preventDefault();
+            this.triggerSecretDiplomaShortcut();
+          }
+        });
+
+        // Trigger welcome video automatically on Enter key in student name input
+        const nameInput = document.getElementById('studentNameInput');
+        if (nameInput) {
+          nameInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+              this.updateName();
+            }
+          });
+        }
+      }
+
+      triggerSecretDiplomaShortcut() {
+        sfx.winFanfare();
+        confetti({ particleCount: 160, spread: 100, origin: { y: 0.4 } });
+        saveResultsToExcel(this.studentName, "100%");
+        diplomaManager.show(this.currentChapterId, "100%");
+      }
+
+      updateName() {
+        sfx.click();
+        const input = document.getElementById('studentNameInput');
+        if (input && input.value.trim()) {
+          this.studentName = input.value.trim();
+          this.playWelcomeVideo();
+        }
+      }
+
+      playWelcomeVideo() {
+        audioManager.silence(); // Silence voice while video is playing
+        const modal = document.getElementById('videoModal');
+        const videoEl = document.getElementById('unitVideoPlayer');
+        const vidCanvas = document.getElementById('videoCinematicCanvas');
+        const modalTitle = document.getElementById('videoModalTitle');
+        const closeBtn = document.getElementById('closeVideoBtn');
+
+        if (modalTitle) {
+          modalTitle.textContent = `Welcome, Scientist ${this.studentName}!`;
+        }
+        if (vidCanvas) vidCanvas.classList.add('hidden');
+        if (closeBtn) {
+          closeBtn.onclick = () => this.finishWelcomeVideo();
+        }
+
+        const welcomeUrl = "https://raw.githubusercontent.com/Milko-arch/5video-natural-resources/c067a1e95096c3a7b2278352d10516d009261da4/Video%20sin%20t%C3%ADtulo%20(18).mp4";
+
+        if (videoEl) {
+          videoEl.classList.remove('hidden');
+          videoEl.muted = false;
+          videoEl.loop = false;
+          videoEl.onended = () => {
+            this.finishWelcomeVideo();
+          };
+          if (videoEl.src !== welcomeUrl) {
+            videoEl.src = welcomeUrl;
+          }
+          videoEl.currentTime = 0;
+          safePlayVideo(videoEl);
+        }
+
+        modal.classList.remove('hidden');
+      }
+
+      finishWelcomeVideo() {
+        sfx.click();
+        const modal = document.getElementById('videoModal');
+        const videoEl = document.getElementById('unitVideoPlayer');
+        if (videoEl) {
+          videoEl.onended = null;
+          safePauseVideo(videoEl);
+        }
+        if (modal) modal.classList.add('hidden');
+
+        // Unlock all units
+        this.unlockAllUnits();
+
+        // Continue speaking after video completion
+        audioManager.speak(`Welcome aboard, Scientist ${this.studentName}! All units are now unlocked. Choose any unit to begin your adventure!`);
+      }
+
+      unlockAllUnits() {
+        const ch1Badge = document.getElementById('ch1StatusBadge');
+        const ch2Badge = document.getElementById('ch2StatusBadge');
+        const ch3Badge = document.getElementById('ch3StatusBadge');
+        if (ch1Badge && this.scores[1] === 0) {
+          ch1Badge.textContent = "Ready 🚀";
+          ch1Badge.className = "text-emerald-600 font-black";
+        }
+        if (ch2Badge && this.scores[2] === 0) {
+          ch2Badge.textContent = "Ready 🚀";
+          ch2Badge.className = "text-amber-600 font-black";
+        }
+        if (ch3Badge && this.scores[3] === 0) {
+          ch3Badge.textContent = "Ready 🚀";
+          ch3Badge.className = "text-cyan-600 font-black";
+        }
+      }
+
+      addCandies(amount) {
+        this.candies += amount;
+        this.updateStatsUI();
+      }
+
+      updateStatsUI() {
+        document.getElementById('candyCount').textContent = this.candies;
+        document.getElementById('heartCount').textContent = quizManager.hearts;
+      }
+
+      showScreen(screenId) {
+        sfx.click();
+        const simVid = document.getElementById('simVideoPlayer');
+        if (simVid) safePauseVideo(simVid);
+        const unitVid = document.getElementById('unitVideoPlayer');
+        if (unitVid) safePauseVideo(unitVid);
+
+        const screens = ['welcomeScreen', 'chapterScreen', 'quizScreen', 'remediationScreen', 'diplomaScreen'];
+        screens.forEach(s => {
+          const el = document.getElementById(s);
+          if (el) el.classList.add('hidden');
+        });
+        const target = document.getElementById(`${screenId}Screen`);
+        if (target) target.classList.remove('hidden');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      launchChapter(chId) {
+        sfx.click();
+        this.currentChapterId = chId;
+        const ch = CHAPTERS_DATA[chId];
+
+        document.getElementById('currentChapterBadge').textContent = ch.badge;
+        document.getElementById('chapterTitle').textContent = ch.title;
+        document.getElementById('chapterSubtitle').textContent = ch.subtitle;
+
+        // Open Video Briefing
+        this.openVideoBriefing(ch);
+      }
+
+      openVideoBriefing(ch) {
+        audioManager.silence(); // Speech muted during video
+        const modal = document.getElementById('videoModal');
+        const videoEl = document.getElementById('unitVideoPlayer');
+        const vidCanvas = document.getElementById('videoCinematicCanvas');
+        const closeBtn = document.getElementById('closeVideoBtn');
+        
+        if (closeBtn) {
+          closeBtn.onclick = () => this.closeVideoAndStartLab();
+        }
+        document.getElementById('videoModalTitle').textContent = ch.title;
+        modal.classList.remove('hidden');
+
+        // Play real MP4 video if configured for the unit
+        if (ch.videoUrl) {
+          if (vidCanvas) vidCanvas.classList.add('hidden');
+          if (videoEl) {
+            videoEl.classList.remove('hidden');
+            videoEl.muted = false;
+            const directUrl = ch.videoUrl.replace('github.com/', 'raw.githubusercontent.com/').replace('/blob/', '/');
+            if (videoEl.src !== directUrl) {
+              videoEl.src = directUrl;
+            }
+            videoEl.currentTime = 0;
+            safePlayVideo(videoEl);
+          }
+        } else {
+          if (videoEl) {
+            safePauseVideo(videoEl);
+            videoEl.classList.add('hidden');
+          }
+          if (vidCanvas) {
+            vidCanvas.classList.remove('hidden');
+            const ctx = vidCanvas.getContext('2d');
+            vidCanvas.width = 640;
+            vidCanvas.height = 360;
+            let frame = 0;
+            const anim = () => {
+              if (modal.classList.contains('hidden')) return;
+              frame += 0.05;
+              ctx.fillStyle = '#0f172a';
+              ctx.fillRect(0, 0, vidCanvas.width, vidCanvas.height);
+              for (let y = 0; y < vidCanvas.height; y += 4) {
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.03)';
+                ctx.fillRect(0, y, vidCanvas.width, 2);
+              }
+              ctx.save();
+              ctx.translate(320, 180);
+              ctx.rotate(frame * 0.5);
+              ctx.font = '72px Fredoka';
+              ctx.textAlign = 'center';
+              ctx.textBaseline = 'middle';
+              ctx.fillText(ch.id === 1 ? '☀️⚡💧' : ch.id === 2 ? '🏭🛢️🧼' : '🦅🌲♻️', 0, 0);
+              ctx.restore();
+              requestAnimationFrame(anim);
+            };
+            anim();
+          }
+        }
+      }
+
+      closeVideoAndStartLab() {
+        sfx.click();
+        const videoEl = document.getElementById('unitVideoPlayer');
+        if (videoEl) {
+          safePauseVideo(videoEl);
+        }
+        document.getElementById('videoModal').classList.add('hidden');
+        this.showScreen('chapter');
+
+        const ch = CHAPTERS_DATA[this.currentChapterId];
+        simManager.setChapter(this.currentChapterId);
+        this.renderConceptCards(ch.concepts);
+        glossaryManager.render(ch.glossary);
+
+        const currentSim = ch.simModes[0];
+        if (!currentSim || !currentSim.videoUrl) {
+          audioManager.speak(`Welcome to ${ch.title}! ${ch.introVideoText}`);
+        }
+      }
+
+      renderConceptCards(concepts) {
+        const grid = document.getElementById('conceptCardsGrid');
+        if (!grid) return;
+        grid.innerHTML = '';
+
+        concepts.forEach(c => {
+          const card = document.createElement('div');
+          card.id = `concept_${c.id}`;
+          card.className = "cursor-pointer bg-white rounded-2xl p-5 border-4 border-slate-200 hover:border-indigo-400 shadow-md hover:shadow-xl transition transform hover:-translate-y-1 flex flex-col justify-between";
+          card.innerHTML = `
+            <div>
+              <div class="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-2xl mb-3 shadow-inner">
+                ${c.icon}
+              </div>
+              <h4 class="font-black text-slate-800 text-base mb-1">${c.title}</h4>
+              <p class="text-xs text-slate-500 font-medium leading-relaxed">${c.summary}</p>
+            </div>
+            <div class="pt-3 border-t border-slate-100 flex items-center justify-between text-indigo-600 font-extrabold text-xs">
+              <span>Explore Animation</span>
+              <i class="fa-solid fa-play"></i>
+            </div>
+          `;
+          card.onclick = () => conceptManager.open(c);
+          grid.appendChild(card);
+        });
+      }
+
+      jumpToSection(sec) {
+        sfx.click();
+        const map = {
+          lab: 'sectionLab',
+          cards: 'sectionCards',
+          glossary: 'sectionGlossary'
+        };
+        const el = document.getElementById(map[sec]);
+        if (el) el.scrollIntoView({ behavior: 'smooth' });
+      }
+
+      startQuiz() {
+        sfx.click();
+        this.showScreen('quiz');
+        const ch = CHAPTERS_DATA[this.currentChapterId];
+        quizManager.init(ch.quiz);
+      }
+
+      redirectToReviewWithRemediation() {
+        sfx.click();
+        this.showScreen('chapter');
+        const ch = CHAPTERS_DATA[this.currentChapterId];
+
+        glossaryManager.render(ch.glossary, remediationManager.missedTerms);
+
+        remediationManager.missedConcepts.forEach(cId => {
+          const card = document.getElementById(`concept_${cId}`);
+          if (card) {
+            card.classList.add('remedy-highlight');
+          }
+        });
+
+        audioManager.speak("Pay more attention to these parts!");
+      }
+
+      updateChapterProgress(chId, score) {
+        this.scores[chId] = Math.max(this.scores[chId], score);
+        const scoreBadge = document.getElementById(`ch${chId}BestScore`);
+        const statusBadge = document.getElementById(`ch${chId}StatusBadge`);
+        if (scoreBadge) scoreBadge.textContent = `${this.scores[chId]}%`;
+        if (statusBadge) {
+          statusBadge.textContent = "Completed ✨";
+          statusBadge.className = "text-emerald-600 font-black";
+        }
+      }
+    }
+
+    let app;
+    let mekoramaEngine;
+
+    function initApplication() {
+      try {
+        if (!app) {
+          app = new MainApp();
+        }
+        if (!mekoramaEngine) {
+          mekoramaEngine = new MekoramaEngine();
+        }
+
+        // Global gesture and event listeners to automatically activate audio without needing manual button press
+        const unlockAllAudio = () => {
+          if (mekoramaEngine && mekoramaEngine.isAudioEnabled) {
+            mekoramaEngine.initAudioContext();
+          }
+          if (window.speechSynthesis && window.speechSynthesis.paused) {
+            window.speechSynthesis.resume();
+          }
+          if (robotIntroManager && !robotIntroManager.hasSpokenIntro && !mekoramaEngine.isCinematicFlyIn) {
+            robotIntroManager.speakMessage();
+          }
+          window.removeEventListener('pointerdown', unlockAllAudio);
+          window.removeEventListener('mousemove', unlockAllAudio);
+          window.removeEventListener('touchstart', unlockAllAudio);
+          window.removeEventListener('keydown', unlockAllAudio);
+        };
+        window.addEventListener('pointerdown', unlockAllAudio);
+        window.addEventListener('mousemove', unlockAllAudio, { once: true });
+        window.addEventListener('touchstart', unlockAllAudio, { once: true });
+        window.addEventListener('keydown', unlockAllAudio, { once: true });
+
+        // Launch B-01 fly-in introductory window immediately on start
+        setTimeout(() => {
+          if (robotIntroManager) {
+            robotIntroManager.showIntro();
+          }
+          // Resume speech synthesis engine immediately
+          if (window.speechSynthesis) {
+            window.speechSynthesis.resume();
+          }
+        }, 200);
+      } catch (err) {
+        console.error("Initialization error:", err);
+      }
+    }
+
+    if (document.readyState === 'loading') {
+      window.addEventListener('DOMContentLoaded', initApplication);
+    } else {
+      initApplication();
+    }
+  </script>
+</body>
+</html>
